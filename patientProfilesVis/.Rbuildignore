@@ -1,3 +1,5 @@
 figures_vignette
 ^vignettes/patientProfiles/
 
+^.*\.Rproj$
+^\.Rproj\.user$
