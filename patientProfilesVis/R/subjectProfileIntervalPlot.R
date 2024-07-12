@@ -180,23 +180,23 @@ subjectProfileIntervalPlot <- function(
 		  
 		  dataSubject <- dataSubject |>
 		    dplyr::mutate(AETERM = forcats::fct_rev(factor(AETERM)))
-		  
+
 		  p <- plotly::plot_ly(
 		    color = dataSubject[[colorVar]]
 		  )
-		  
+
 		  # We're going to plot each colorVar sequentially, and within it, plot
 		  # start/end points + segments, that way we can control all three with "MILD" click
-		  
+
 		  for (colour in levels(dataSubject[[colorVar]])) {
 		    dat <- dataSubject[!is.na(dataSubject[[colorVar]]) & dataSubject[[colorVar]] == colour,]
-		    
+
 		    # Plot the start points
 		    for (category in unique(dat[[timeStartShapeVar]])) {
 		      if (!is.na(category)) {
-		        
+
 		        start_dat <- dat[!is.na(dat[[timeStartShapeVar]]) & dat[[timeStartShapeVar]] == category,]
-		        
+
 		        p <- p |>
 		          plotly::add_trace(
 		            x = start_dat[[timeStartVar]],
@@ -208,17 +208,24 @@ subjectProfileIntervalPlot <- function(
 		            marker = list(symbol = shape_scale[[category]],
 		                          size = 10),
 		            showlegend = TRUE,
-		            legendgroup = colour # This is necessary to control multiple traces with one legend.
+		            legendgroup = colour, # This is necessary to control multiple traces with one legend.
+		            hovertemplate = paste0(
+		              '<b>Study day of start of adverse event</b>: %{x}<br>',
+		              '<b>', paramVar, '</b>: %{y}<br>',
+		              '<b>', colorVar, '</b>: ', start_dat[[colorVar]], '<br>',
+		              '<b>Status</b>: ', start_dat[[timeEndShapeVar]], '<br>',
+		              '<extra></extra>'
+		            )
 		          )
 		      }
 		    }
-		    
+
 		    # Plot the end points
 		    for (category in unique(dat[[timeEndShapeVar]])) {
 		      if (!is.na(category)) {
-		        
+
 		        end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
-		        
+
 		        p <- p |>
 		          plotly::add_trace(
 		            x = end_dat[[timeEndVar]],
@@ -230,14 +237,21 @@ subjectProfileIntervalPlot <- function(
 		            marker = list(symbol = shape_scale[[category]],
 		                          size = 10),
 		            showlegend = FALSE,
-		            legendgroup = colour
+		            legendgroup = colour,
+		            hovertemplate = paste0(
+		              '<b>Study day of end of adverse event</b>: %{x}<br>',
+		              '<b>', paramVar, '</b>: %{y}<br>',
+		              '<b>', colorVar, '</b>: ', end_dat[[colorVar]], '<br>',
+		              '<b>Status</b>: ', end_dat[[timeEndShapeVar]], '<br>',
+		              '<extra></extra>'
+		            )
 		          )
 		      }
 		    }
-		    
+
 		    # Plot the connecting lines
 		    segment_df <- dat[!is.na(dat$missingStartPlot) & !is.na(dat$missingEndPlot), ]
-		    
+
 		    if (nrow(segment_df) > 0) {
 		      p <- p |>
 		        plotly::add_segments(
@@ -250,9 +264,19 @@ subjectProfileIntervalPlot <- function(
 		          showlegend = FALSE,
 		          legendgroup = colour
 		        )
-		    } 
+		    }
 		  }
-		  browser()
+		  
+		  p <- p |>
+		    plotly::layout(
+		      title = title,
+		      xaxis = list(
+		        zeroline = FALSE,
+		        title = xLab
+		      )
+		    )
+		  
+		  p
 		  
 		# 	aesArgs <- c(
 		# 		list(
@@ -401,14 +425,6 @@ subjectProfileIntervalPlot <- function(
 		})
 
 	})
-
-	# metaData: stored plot label
-	attr(listPlots, 'metaData') <- c(
-		list(label = label, timeLim = timeLimInit),
-		if(!is.null(timeTrans))	list(timeTrans = timeTrans),
-		if(!is.null(timeExpand))	list(timeExpand = timeExpand)
-	)
-
 	return(listPlots)
 	
 }
