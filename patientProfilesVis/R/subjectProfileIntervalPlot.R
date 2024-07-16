@@ -183,8 +183,8 @@ subjectProfileIntervalPlot <- function(
 		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
 		  
 		  if (plotly == TRUE) {
-		    dataSubject <- dataSubject |>
-		      dplyr::mutate(AETERM = forcats::fct_rev(factor(AETERM)))
+		    
+		    dataSubject[[paramVar]] <- forcats::fct_rev(factor(dataSubject[[paramVar]]))
 		    
 		    p <- plotly::plot_ly(
 		      color = dataSubject[[colorVar]]
@@ -215,7 +215,7 @@ subjectProfileIntervalPlot <- function(
 		              showlegend = TRUE,
 		              legendgroup = colour, # This is necessary to control multiple traces with one legend.
 		              hovertemplate = paste0(
-		                '<b>Study day of start of adverse event</b>: %{x}<br>',
+		                '<b>', timeStartVar, '</b>: %{x}<br>',
 		                '<b>', paramVar, '</b>: %{y}<br>',
 		                '<b>', colorVar, '</b>: ', start_dat[[colorVar]], '<br>',
 		                '<b>Status</b>: ', start_dat[[timeEndShapeVar]], '<br>',
@@ -244,7 +244,7 @@ subjectProfileIntervalPlot <- function(
 		              showlegend = FALSE,
 		              legendgroup = colour,
 		              hovertemplate = paste0(
-		                '<b>Study day of end of adverse event</b>: %{x}<br>',
+		                '<b>', timeEndVar, '</b>: %{x}<br>',
 		                '<b>', paramVar, '</b>: %{y}<br>',
 		                '<b>', colorVar, '</b>: ', end_dat[[colorVar]], '<br>',
 		                '<b>Status</b>: ', end_dat[[timeEndShapeVar]], '<br>',
