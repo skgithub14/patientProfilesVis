@@ -66,7 +66,8 @@ subjectProfileIntervalPlot <- function(
 	labelVars = NULL,
 	formatReport = subjectProfileReportFormat(),
 	paging = TRUE,
-	plotly = FALSE){
+	plotly = FALSE,
+	plotly_hover_text = NULL){
 
 	timeImpType <- match.arg(timeImpType)
 	
@@ -161,7 +162,7 @@ subjectProfileIntervalPlot <- function(
 	hasShapeVar <- !is.null(timeStartShapeVar) | !is.null(timeEndShapeVar)
 	
 	listPlots <- dlply(data, subjectVar, function(dataSubject){	
-						
+	  
 		subject <- unique(dataSubject[, subjectVar])
 		
 		# split plot into multiple page(s)
@@ -218,7 +219,8 @@ subjectProfileIntervalPlot <- function(
 		                '<b>', timeStartVar, '</b>: %{x}<br>',
 		                '<b>', paramVar, '</b>: %{y}<br>',
 		                '<b>', colorVar, '</b>: ', start_dat[[colorVar]], '<br>',
-		                '<b>Status</b>: ', start_dat[[timeEndShapeVar]], '<br>',
+		                '<b>Status</b>: ', start_dat[[timeStartShapeVar]], '<br>',
+		                # if (!is.null(plotly_hover_text)) paste(purrr::imap(plotly_hover_text, ~{paste0("<b>", .y, "</b>: ", start_dat[[.x]])}), collapse = "<br>"),
 		                '<extra></extra>'
 		              )
 		            )
