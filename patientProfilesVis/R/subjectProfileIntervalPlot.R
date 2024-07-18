@@ -17,6 +17,8 @@
 #' By default the caption contains information on the imputation strategy 
 #' for missing time. 
 #' @param plotly Boolean. If TRUE, generate a plotly output, if not, ggplot.
+#' @param plotly_hover_text Named vector. If provided, plotly hover will include
+#' this information, in form of `<b>Name</b>: value`
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams clinUtils::formatVarForPlotLabel
@@ -199,9 +201,16 @@ subjectProfileIntervalPlot <- function(
 		      
 		      # Plot the start points
 		      for (category in unique(dat[[timeStartShapeVar]])) {
+		        
 		        if (!is.na(category)) {
 		          
 		          start_dat <- dat[!is.na(dat[[timeStartShapeVar]]) & dat[[timeStartShapeVar]] == category,]
+		          
+		          hover_texts <- apply(start_dat, 1, generate_plotly_hover_text, 
+		                               timeStartVar, paramVar, colorVar, 
+		                               timeStartShapeVar, plotly_hover_text)
+		          
+		          start_dat$hover_texts <- unname(hover_texts)
 		          
 		          p <- p |>
 		            plotly::add_trace(
@@ -215,14 +224,8 @@ subjectProfileIntervalPlot <- function(
 		                            size = 10),
 		              showlegend = TRUE,
 		              legendgroup = colour, # This is necessary to control multiple traces with one legend.
-		              hovertemplate = paste0(
-		                '<b>', timeStartVar, '</b>: %{x}<br>',
-		                '<b>', paramVar, '</b>: %{y}<br>',
-		                '<b>', colorVar, '</b>: ', start_dat[[colorVar]], '<br>',
-		                '<b>Status</b>: ', start_dat[[timeStartShapeVar]], '<br>',
-		                # if (!is.null(plotly_hover_text)) paste(purrr::imap(plotly_hover_text, ~{paste0("<b>", .y, "</b>: ", start_dat[[.x]])}), collapse = "<br>"),
-		                '<extra></extra>'
-		              )
+		              text = start_dat[["hover_texts"]],
+		              hoverinfo = "text"
 		            )
 		        }
 		      }
@@ -232,6 +235,12 @@ subjectProfileIntervalPlot <- function(
 		        if (!is.na(category)) {
 		          
 		          end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
+		          
+		          hover_texts <- apply(end_dat, 1, generate_plotly_hover_text, 
+		                               timeStartVar, paramVar, colorVar, 
+		                               timeStartShapeVar, plotly_hover_text)
+		          
+		          end_dat$hover_texts <- unname(hover_texts)
 		          
 		          p <- p |>
 		            plotly::add_trace(
@@ -245,13 +254,8 @@ subjectProfileIntervalPlot <- function(
 		                            size = 10),
 		              showlegend = FALSE,
 		              legendgroup = colour,
-		              hovertemplate = paste0(
-		                '<b>', timeEndVar, '</b>: %{x}<br>',
-		                '<b>', paramVar, '</b>: %{y}<br>',
-		                '<b>', colorVar, '</b>: ', end_dat[[colorVar]], '<br>',
-		                '<b>Status</b>: ', end_dat[[timeEndShapeVar]], '<br>',
-		                '<extra></extra>'
-		              )
+		              text = end_dat[["hover_texts"]],
+		              hoverinfo = "text"
 		            )
 		        }
 		      }
