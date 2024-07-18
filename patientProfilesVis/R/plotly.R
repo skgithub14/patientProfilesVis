@@ -24,65 +24,95 @@
 #' @returns a string with html formatting
 #' 
 linePlotHoverTemplate <- function(title, 
+                                  paramValueVar,
+                                  paramValueVarUnits = NULL,
                                   timeLab, 
-                                  paramValueVar, 
+                                  timeVar,
                                   colorLab = NULL, 
-                                  colorVal = NULL, 
+                                  colorVar = NULL, 
                                   shapeLab = NULL, 
-                                  shapeVal = NULL,
-                                  visit = NULL,
-                                  date = NULL,
+                                  shapeVar = NULL,
                                   lln = NULL,
                                   uln = NULL,
-                                  grade = NULL,
-                                  alert = NULL) {
-  
-  # title (parameter with units), value, and study day
+                                  add_vars = NULL) {
+    
+  # title (usually the parameter name) and y value
   ht <- paste0(
     '<b>', title, '</b><br><br>',
-    '<i>', paramValueVar, '</i>: %{y}<br>',
-    '<i>', timeLab, '</i>: %{x}<br>'
+    '<i>Value</i>: ', paramValueVar
   )
   
-  ## additional timing variables
-  # visit
-  if (!is.null(visit)) ht <- paste0(ht, '<i>Visit</i>: ', visit, '<br>')
+  # optionally add units for y value
+  if (!is.null(paramValueVarUnits)) {
+    units <- purrr::map_chr(paramValueVarUnits, \(x) {
+      if (!is.na(x) & x != "") {
+        paste0(' ', x, '<br>')
+      } else {
+        '<br>'
+      }
+    })
+    ht <- paste0(ht, units)
+  } else {
+    ht <- paste0(ht, '<br>')
+  }
   
-  # date
-  if (!is.null(date)) ht <- paste0(ht, '<i>Date</i>: ', date, '<br>')
+  # x value (time)
+  ht <- paste0(ht, '<i>', timeLab, '</i>: ', timeVar, '<br>')
   
-  ## additional aesthetic variables
+  ## optional variables
   # color
-  if (!is.null(colorLab) & !is.null(colorVal)) {
-    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
+  if (!is.null(colorLab) & !is.null(colorVar)) {
+    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVar, '<br>')
   }
   
   # shape
-  if (!is.null(shapeLab) & !is.null(shapeVal)) {
-    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
+  if (!is.null(shapeLab) & !is.null(shapeVar)) {
+    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVar, '<br>')
   }
   
   # ranges
-  if (!is.null(uln)) ht <- paste0(ht, '<i>ULN</i>: ', uln, '<br>')
-  if (!is.null(lln)) ht <- paste0(ht, '<i>LLN</i>: ', lln, '<br>')
-  
-  ## value interpretation variables
-  # grade
-  if (!is.null(grade)) {
-    if (!is.na(grade) & grade != "") {
-      ht <- paste0(ht, '<i>Grade</i>: ', grade, '<br>')
-    }
+  if (!is.null(lln) & !is.null(uln)) {
+    ht <- paste0(
+      ht,
+      '<i>ULN</i>: ', uln, '<br>',
+      '<i>LLN</i>: ', lln, '<br>'
+    )
   }
   
-  # alert
-  if (!is.null(alert)) {
-    if (!is.na(alert) & alert != "") {
-      ht <- paste0(ht, '<i>Alert</i>: ', alert, '<br>')
-    }
+  ## additional variables
+  if (!is.null(add_vars)) {
+    add_vars1 <- purrr::imap(add_vars, \(value, label) {
+      purrr::map_chr(value, \(val) {
+        if (!is.na(val) & val != "") {
+          paste0('<i>', label, '</i>: ', val, '<br>')
+        } else {
+          ""
+        }
+      })
+    }) %>%
+      purrr::discard(is.null) %>%
+      purrr::reduce(paste0)
+    ht <- paste0(ht, add_vars1)
   }
   
   ht <- paste0(ht, '<extra></extra>')
   return(ht)
+}
+
+
+linePlotHoverTemplateDF <- function(data,
+                                    paramValueVar,
+                                    paramValueVarUnits = NULL,
+                                    timeLab, 
+                                    timeVar,
+                                    colorLab = NULL, 
+                                    colorVar = NULL, 
+                                    shapeLab = NULL, 
+                                    shapeVar = NULL,
+                                    lln = NULL,
+                                    uln = NULL,
+                                    add_vars = NULL) {
+  
 }
 
 
@@ -170,6 +200,7 @@ convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
 #'
 plotlyLinePlot <- function(data,
                            paramValueVar,
+                           paramValueVarUnits = NULL,
                            paramValueRangeVar = NULL,
                            colorValueRange,
                            colorVar = NULL,
@@ -182,12 +213,9 @@ plotlyLinePlot <- function(data,
                            shapeSize,
                            timeVar,
                            timeLab,
-                           xLab,
                            title,
-                           visitVar = NULL,
-                           dateVar = NULL,
-                           gradeVar = NULL,
-                           alertVar = NULL,
+                           xLab,
+                           tooltip_add_vars = NULL,
                            facetVarMaxLength = 30,
                            margin = list(
                              l = 250,
@@ -199,9 +227,49 @@ plotlyLinePlot <- function(data,
                            yaxis_title_shift = -0.035,
                            spikecolor = 'red') {
   
-  
-  browser()
-  
+  # create tool tip column in data
+  if (!is.null(paramValueVarUnits)) {
+    paramValueVarUnitsDat <- data[[paramValueVarUnits]]
+  } else {
+    paramValueVarUnitsDat <- NULL
+  }
+  if (!is.null(colorVar)) {
+    colorVarDat <- data[[colorVar]]
+  } else {
+    colorVarDat <- NULL
+  }
+  if (!is.null(shapeVar)) {
+    shapeVarDat <- data[[shapeVar]]
+  } else {
+    shapeVarDat <- NULL
+  }
+  if (!is.null(paramValueRangeVar)) {
+    llnDat <- data[[paramValueRangeVar[1]]]
+    ulnDat <- data[[paramValueRangeVar[2]]]
+  } else {
+    llnDat <- NULL
+    ulnDat <- NULL
+  }
+  if (!is.null(tooltip_add_vars)) {
+    tooltip_add_vars <- purrr::map(tooltip_add_vars, \(x) data[[x]])
+  }
+  data <- dplyr::mutate(
+    data,
+    hovertemplate = linePlotHoverTemplate(
+      title = paramFacetVar,
+      paramValueVar = !!rlang::sym(paramValueVar),
+      paramValueVarUnits = paramValueVarUnitsDat,
+      timeLab = timeLab,
+      timeVar = !!rlang::sym(timeVar),
+      colorLab = colorLab,
+      colorVar = colorVarDat,
+      shapeLab = shapeLab,
+      shapeVar = shapeVarDat,
+      lln = llnDat,
+      uln = ulnDat,
+      add_vars = tooltip_add_vars
+    )
+  )
   
   # format ribbon colors
   ribbon_color <- col2rgb(colorValueRange)
@@ -213,11 +281,9 @@ plotlyLinePlot <- function(data,
   
   # create a shape symbol column in the data
   if (!is.null(shapeVar)) {
-    # data <- dplyr::mutate(
-    #   data,
-    #   shapeVarSymbol = dplyr::recode(!!rlang::sym(shapeVar), !!!shapePalette)
-    # )
-    shapePalettePlotly <- convert_ggplot_shapes_to_plotly_symbols(shapePalette)
+    shapePalettePlotly <- convert_ggplot_shapes_to_plotly_symbols(
+      shapes = shapePalette
+    )
   }
   
   # format y axis labels if too long
@@ -250,42 +316,49 @@ plotlyLinePlot <- function(data,
         x = ~.data[[timeVar]],
         y = ~yVar
       ) %>%
-        plotly::add_trace(
-          type = "scatter",
-          mode = "markers",
-          symbol = ~shapeVar,
-          symbols = shapePalettePlotly,
-          marker = list(
-            color = if (!is.null(colorVar)) {
-              colorPalette[
-                which(names(colorPalette) == unique(.data[[colorVar]]))
-              ]
-            } else {
-              colorPalette # variable is never NULL in subjectProfileLinePlot
-            },
-            size = shapeSize,
-            opacity = alpha
-          ),
-          showlegend = FALSE
-          # ,
-          # hovertemplate = linePlotHoverTemplate(
-          #   # title = unique(.data$paramFacetVar),
-          #   title = .data$paramFacetVar,
-          #   timeLab = timeLab,
-          #   paramValueVar = paramValueVar,
-          #   colorLab = colorLab,
-          #   # colorVal = unique(.data[[colorVar]]),
-          #   colorVal = .data[[colorVar]],
-          #   shapeLab = shapeLab,
-          #   shapeVal = .data[[shapeVar]],
-          #   visit = .data[[visitVar]],
-          #   date = .data[[dateVar]],
-          #   lln = .data[[paramValueRangeVar[1]]],
-          #   uln = .data[[paramValueRangeVar[2]]],
-          #   grade = .data[[gradeVar]],
-          #   alert = .data[[alertVar]]
-          # )
-        ) %>%
+        {
+          if (!is.null(shapeVar)) {
+            plotly::add_trace(
+              .,
+              type = "scatter",
+              mode = "markers",
+              symbol = ~shapeVar,
+              symbols = shapePalettePlotly,
+              marker = list(
+                color = if (!is.null(colorVar)) {
+                  colorPalette[
+                    which(names(colorPalette) == unique(.data[[colorVar]]))
+                  ]
+                } else {
+                  colorPalette # variable is never NULL in subjectProfileLinePlot
+                },
+                size = shapeSize,
+                opacity = alpha
+              ),
+              showlegend = FALSE,
+              hovertemplate = .data$hovertemplate
+            )
+          } else {
+            plotly::add_trace(
+              .,
+              type = "scatter",
+              mode = "markers",
+              marker = list(
+                color = if (!is.null(colorVar)) {
+                  colorPalette[
+                    which(names(colorPalette) == unique(.data[[colorVar]]))
+                  ]
+                } else {
+                  colorPalette # variable is never NULL in subjectProfileLinePlot
+                },
+                size = shapeSize,
+                opacity = alpha
+              ),
+              showlegend = FALSE,
+              hovertemplate = .data$hovertemplate
+            )
+          }
+        } %>%
         plotly::add_trace(
           type = "scatter",
           mode = "lines",
