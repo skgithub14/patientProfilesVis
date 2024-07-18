@@ -206,11 +206,11 @@ plotlyLinePlot <- function(data,
                            colorVar = NULL,
                            colorLab = NULL,
                            colorPalette,
-                           alpha,
+                           alpha = 1,
                            shapeVar = NULL,
                            shapeLab = NULL,
                            shapePalette = NULL,
-                           shapeSize,
+                           shapeSize = 7,
                            timeVar,
                            timeLab,
                            title,
@@ -272,12 +272,14 @@ plotlyLinePlot <- function(data,
   )
   
   # format ribbon colors
-  ribbon_color <- col2rgb(colorValueRange)
-  ribbon_color <- paste0("rgba(", 
-                         ribbon_color[1,1], ",",
-                         ribbon_color[2,1], ",",
-                         ribbon_color[3,1], ",",
-                         "0.2)")
+  if (!is.null(colorValueRange)) {
+    ribbon_color <- col2rgb(colorValueRange)
+    ribbon_color <- paste0("rgba(", 
+                           ribbon_color[1,1], ",",
+                           ribbon_color[2,1], ",",
+                           ribbon_color[3,1], ",",
+                           "0.2)")
+  }
   
   # create a shape symbol column in the data
   if (!is.null(shapeVar)) {
