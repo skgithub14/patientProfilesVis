@@ -100,23 +100,6 @@ linePlotHoverTemplate <- function(title,
 }
 
 
-linePlotHoverTemplateDF <- function(data,
-                                    paramValueVar,
-                                    paramValueVarUnits = NULL,
-                                    timeLab, 
-                                    timeVar,
-                                    colorLab = NULL, 
-                                    colorVar = NULL, 
-                                    shapeLab = NULL, 
-                                    shapeVar = NULL,
-                                    lln = NULL,
-                                    uln = NULL,
-                                    add_vars = NULL) {
-  
-}
-
-
-
 #' Convert [ggplot] shape to [plotly] symbol
 #'
 #' @param shapes a numeric or character vector representing [ggplot2] shapes
