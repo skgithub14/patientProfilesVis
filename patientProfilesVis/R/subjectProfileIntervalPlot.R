@@ -237,8 +237,8 @@ subjectProfileIntervalPlot <- function(
 		          end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
 		          
 		          hover_texts <- apply(end_dat, 1, generate_plotly_hover_text, 
-		                               timeStartVar, paramVar, colorVar, 
-		                               timeStartShapeVar, plotly_hover_text)
+		                               timeEndVar, paramVar, colorVar, 
+		                               timeEndShapeVar, plotly_hover_text)
 		          
 		          end_dat$hover_texts <- unname(hover_texts)
 		          
