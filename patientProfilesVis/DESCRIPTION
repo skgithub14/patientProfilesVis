@@ -22,19 +22,21 @@ Description: Creation of patient profile visualizations for
   Visualizations are exported into patient profile report(s)
   or can be embedded in custom report(s).
 Imports: 
-  clinUtils,
-  ggplot2 (>= 3.0.0), 
-  plyr, 
-  cowplot, 
-  tools, 
-  reshape2, 
-  knitr, 
-  grid, 
-  stringr, 
-  parallel, 
-  gridExtra, 
-  scales,
-  utils
+    clinUtils,
+    ggplot2 (>= 3.0.0),
+    plyr,
+    cowplot,
+    tools,
+    reshape2,
+    knitr,
+    grid,
+    stringr,
+    parallel,
+    gridExtra,
+    scales,
+    utils,
+    plotly,
+    forcats
 Suggests: 
   pander, 
   shiny, 
