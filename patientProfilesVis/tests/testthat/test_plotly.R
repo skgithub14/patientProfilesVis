@@ -330,7 +330,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     tooltip_add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    ),
+    )
   )
   
   # plot without units
@@ -355,7 +355,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     tooltip_add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    ),
+    )
   )
   
   # plot without colors
@@ -430,7 +430,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     tooltip_add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    ),
+    )
   )
   
   # plot without tooltip_add_vars
@@ -454,4 +454,65 @@ test_that("plotlyLinePlot() generates a line plot", {
     xLab = "Study Day",
     tooltip_add_vars = NULL
   )
+})
+
+
+#### subjectProfileLinePlot() ####
+
+test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
+  
+  # data prep
+  data("dataSDTMCDISCP01", package = "clinUtils")
+  dataSDTM <- dataSDTMCDISCP01
+  dataLB <- dataSDTM$LB
+  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  subjectLB <- "01-704-1445"
+  dataLB <- dplyr::filter(dataLB, USUBJID == subjectLB)
+  data <- dataLB
+  labelVarsSDTM <- attr(dataSDTM, "labelVars")
+  
+  p <- subjectProfileLinePlot(
+    data = data,
+    paramNameVar = "LBTEST",
+    paramValueVar = "LBSTRESN", 
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"), 
+    colorVar = "LBCAT", 
+    shapeVar = "LBNRIND", 
+    paramGroupVar = "LBCAT",
+    timeVar = "LBDY",
+    title = "Laboratory test measurements: actual value",
+    labelVars = labelVarsSDTM,
+    shapeSize = rel(1),
+    plotly = TRUE,
+    plotly_args = list(
+      paramValueVarUnits = "LBSTRESU"
+    )
+  )
+  
+})
+
+
+test_that("subjectProfileLinePlot() can produce plotly outputs for more than 1 subject", {
+  
+  # data prep
+  data("dataSDTMCDISCP01", package = "clinUtils")
+  dataSDTM <- dataSDTMCDISCP01
+  dataLB <- dataSDTM$LB
+  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  subjectLB <- c("01-704-1445", "01-701-1192")
+  dataLB <- dplyr::filter(dataLB, USUBJID %in% subjectLB)
+  data <- dataLB
+  labelVarsSDTM <- attr(dataSDTM, "labelVars")
+  
+  p <- subjectProfileLinePlot(
+    data = data,
+    paramNameVar = "LBTEST",
+    paramValueVar = "LBSTRESN", 
+    timeVar = "LBDY",
+    title = "Laboratory test measurements: actual value",
+    labelVars = labelVarsSDTM,
+    shapeSize = 7,
+    plotly = TRUE
+  )
+  
 })

@@ -384,7 +384,6 @@ plotlyLinePlot <- function(data,
           )
         ) %>%
         plotly::add_annotations(
-          # text = unique(.data$paramFacetVar),
           text = .data$paramFacetVar,
           xref = "paper",
           yref = "paper",

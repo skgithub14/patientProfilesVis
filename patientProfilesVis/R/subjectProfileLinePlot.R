@@ -78,7 +78,22 @@ subjectProfileLinePlot <- function(
 	labelVars = NULL,
 	formatReport = subjectProfileReportFormat(),
 	paging = TRUE,
-	alpha = 1, shapeSize = rel(1)
+	alpha = 1, shapeSize = rel(1),
+	plotly = FALSE,
+	plotly_args = list(
+	  paramValueVarUnits = NULL,
+	  tooltip_add_vars = NULL,
+	  facetVarMaxLength = 30,
+	  margin = list(
+	    l = 250,
+	    r = 50,
+	    b = 75,
+	    t = 50,
+	    pad = 4
+	  ),
+	  yaxis_title_shift = -0.035,
+	  spikecolor = 'red'
+	)
 ){
 	
 	yLimFrom <- match.arg(yLimFrom)
@@ -179,203 +194,260 @@ subjectProfileLinePlot <- function(
 	}
 	
 	listPlots <- dlply(data, subjectVar, function(dataSubject){	
+	  
+	  subject <- unique(dataSubject[, subjectVar])
+	  
+	  if (plotly) {
+	    
+	    # reset defaults if they were dropped from `plotly_args`
+	    if (is.null(plotly_args$facetVarMaxLength)) {
+	      plotly_args$facetVarMaxLength <- 30
+	    }
+	    if (is.null(plotly_args$margin)) {
+	      plotly_args$margin <- list(l = 250, r = 50, b = 75, t = 50, pad = 4)
+	    }
+	    if (is.null(plotly_args$yaxis_title_shift)) {
+	      plotly_args$yaxis_title_shift <- -0.035
+	    }
+	    if (is.null(plotly_args$spikecolor)) {
+	      plotly_args$spikecolor <- 'red'
+	    }
+	    
+	    pltly <- plotlyLinePlot(
+	      data = dataSubject,
+        paramValueVar = paramValueVar,
+        paramValueVarUnits = plotly_args$paramValueVarUnits, # NEED TO ADD ARGUMENT
+        paramValueRangeVar = paramValueRangeVar,
+        colorValueRange = colorValueRange,
+        colorVar = colorVar,
+        colorLab = colorLab,
+        colorPalette = colorPalette,
+        alpha = alpha,
+        shapeVar = shapeVar,
+        shapeLab = shapeLab,
+        shapePalette = shapePalette,
+        shapeSize = shapeSize,
+        timeVar = timeVar,
+        timeLab = timeLab,
+        title = title,
+        xLab = xLab,
+        tooltip_add_vars = plotly_args$tooltip_add_vars,
+        facetVarMaxLength = plotly_args$facetVarMaxLength,
+        margin = plotly_args$margin,
+        yaxis_title_shift = plotly_args$yaxis_title_shift,
+        spikecolor = plotly_args$spikecolor
+	    )
+	    
+	    ## set attributes
+	    
+	    attr(pltly, 'metaData') <- list(subjectID = subject)
+	    
+	    return(pltly)
+	    
+	  } else {
 				
-		# split plot into multiple page(s)
-		dataSubject <- getPageVar(
-			data = dataSubject, 
-			var = "paramFacetVar", typeVar = "panel",
-			formatReport = formatReport,
-			title = !is.null(title),
-			xLab = !is.null(xLab),
-			caption = FALSE,
-			paging = paging
-		)
-		
-		subject <- unique(dataSubject[, subjectVar])
-		
-		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
-			
-			# create the plot
-			aesArgs <- list(x = sym(timeVar), y = sym("yVar"))
-			gg <- ggplot(data = dataSubjectPage, do.call(aes, aesArgs))
-			
-			# range of the variable
-			if(!is.null(paramValueRangeVar)){
-				dataRibbon <- dataSubjectPage[!(
-					is.na(dataSubjectPage[, paramValueRangeVar[1]]) &
-					is.na(dataSubjectPage[, paramValueRangeVar[2]])
-				), ]
-				if(length(dataRibbon) > 0){
-					# use geom_ribbon instead of geom_rect in case different intervals for different time points
-					aesRibbon <- list(
-					  x = sym(timeVar), 
-					  ymin = sym(paramValueRangeVar[1]), 
-            ymax = sym(paramValueRangeVar[2])
-					)
-				  gg <- gg + 
-						geom_ribbon(
-							mapping = do.call(aes, aesRibbon),
-							data = dataRibbon,
-							fill = colorValueRange, 
-							alpha = 0.1
-						)
-				}
-			}
-			
-			# line
-			if(!is.null(paramNameVar)){
-				# remove rows with only one point (no need to connect points with the line)
-				# to avoid warning: geom_path: Each group consists of only one observation. Do you need to adjust the group aesthetic?
-				# when 'facet_grid' is called
-				nPointsPerParamName <- ddply(dataSubjectPage, "paramFacetVar", nrow)
-				paramNameRetained <- nPointsPerParamName[which(nPointsPerParamName$V1 > 1), "paramFacetVar"]
-				dataLine <- dataSubjectPage[which(dataSubjectPage[, "paramFacetVar"] %in% paramNameRetained), ]
-			}else	dataLine <- dataSubjectPage
-			if(nrow(dataLine) > 0)
-				gg <- gg + geom_line(data = dataLine, alpha = alpha)
-			
-			# point
-			aesArgsPoint <- c(
-				if(!is.null(colorVar))	list(color = sym(colorVar), fill = sym(colorVar)),
-				if(!is.null(shapeVar))	list(shape = sym(shapeVar))
-			)
-			
-			if(length(aesArgsPoint) > 0){
-			  argsGeomPoint <- list(
-			    mapping = do.call(aes, aesArgsPoint), 
-			    alpha = alpha, size = shapeSize
-			  )
-			  if(packageVersion("ggplot2") >= "3.5.0"){
-			    showLegend <- c(
-			      if(!is.null(colorVar)) c(color = TRUE, fill = TRUE),
-			      if(!is.null(shapeVar))	c(shape = TRUE)
-			    )
-			    if(length(showLegend) > 0)
-			      argsGeomPoint[["show.legend"]] <- showLegend
-			  }
-				gg <- gg + do.call(geom_point, argsGeomPoint)
-			}else{
-				gg <- gg + geom_point(alpha = alpha, size = shapeSize)
-			}
-			
-			if(!is.null(title))
-				gg <- gg + ggtitle(title)
-			
-			if(!is.null(xLab))
-				gg <- gg + xlab(xLab)
-			
-			if(!is.null(yLab))
-				gg <- gg + ylab(yLab)
-			
-			# general
-			gg <- gg + 
-				subjectProfileTheme() +
-				theme(axis.text.y = element_text(size = 7))
-			
-			if(!is.null(paramNameVar)){
-				
-				gg <- gg + facet_grid(
-					paste0("paramFacetVar", "~."), 
-					scales = "free_y", switch = "y"#,
-#					labeller = label_wrap_gen(width = Inf)
-				)
-				
-				argsTheme <- list(
-					strip.placement = "outside", 
-					strip.background = element_rect(color = NA, fill = NA)
-				)
-				argsTheme <- c(argsTheme, 
-					list(strip.text.y.left = element_text(angle = 0, size = 8, hjust = 1))
-				)
-				gg <- gg + do.call(theme, argsTheme)
-			
-				# count number of lines each facet will take
-				nLinesPlot <- countNLines(unique(dataSubjectPage[, "paramFacetVar"]))
-				nLinesPlot <- Vectorize(FUN = function(x){max(c(x, 4))})(nLinesPlot)
-				
-			}else	nLinesPlot <- 4
-		
-			# color palette and name for color legend
-			if(!is.null(colorVar)){
-				gg <- gg + 
-					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
-					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "fill")
-			}else{
-				gg <- gg + 
-					scale_color_manual(values = colorPalette) +
-					scale_fill_manual(values = colorPalette)
-			}
-		
-			if(!is.null(shapeVar))
-				gg <- gg + 
-					getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")	
-		
-			argsScaleX <- c(
-				if(!is.null(timeExpand))	list(expand = timeExpand),
-				if(!is.null(timeTrans))	list(trans = timeTrans)
-			)
-			if(length(argsScaleX) > 0)
-				gg <- gg + do.call("scale_x_continuous", argsScaleX)
-		
-			# set time limits for the x-axis
-			# default: FALSE in case time limits are changed afterwards
-			if(!is.null(timeLim)){
-				timeLimSubject <- if(is.list(timeLim))	timeLim[[subject]]	else	timeLim
-				gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
-			}
-		
-			## extract number of lines
-			
-			# legend:
-			nLinesLegendColor <- if(!is.null(colorVar)){
-				getNLinesLegend(values = colorPalette, title = colorLab)
-			}else	0
-			nLinesLegendShape <- if(!is.null(shapeVar)){
-				getNLinesLegend(values = shapePalette, title = shapeLab)
-			}else	0
-			nLinesLegend <- 0 +
-				if(!is.null(colorVar) & !is.null(shapeVar)){
-					# one legend (ggplot will create separate legend if the title differ)
-					if(colorVar == shapeVar && !is.null(colorLab) & !is.null(shapeLab) && shapeLab == colorLab){
-						nLinesLegendColor 
-						# two legends
-					}else{
-						# 1 line to separate the two legends if color and shape are specified and different
-						nLinesLegendColor + nLinesLegendShape + 1
-					}
-				}else	if(!is.null(colorVar)){
-					nLinesLegendColor
-				}else	if(!is.null(shapeVar)){
-					nLinesLegendShape
-				}else	0
-		
-			nLinesPlot <- max(sum(nLinesPlot), nLinesLegend)
-			
-			# in title and axes
-			nLinesTitleAndXAxis <- sum(c(
-				getNLinesLabel(value = title, elName = "title"), 
-				getNLinesLabel(value = xLab, elName = "x")
-			))
-			nLines <- nLinesPlot + nLinesTitleAndXAxis
-
-			## set attributes
-			
-			attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
-			class(gg) <- c("subjectProfileLinePlot", class(gg))
-		
-			gg
-			
-		})
+  		# split plot into multiple page(s)
+  		dataSubject <- getPageVar(
+  			data = dataSubject, 
+  			var = "paramFacetVar", typeVar = "panel",
+  			formatReport = formatReport,
+  			title = !is.null(title),
+  			xLab = !is.null(xLab),
+  			caption = FALSE,
+  			paging = paging
+  		)
+  		
+  		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
+  			
+  			# create the plot
+  			aesArgs <- list(x = sym(timeVar), y = sym("yVar"))
+  			gg <- ggplot(data = dataSubjectPage, do.call(aes, aesArgs))
+  			
+  			# range of the variable
+  			if(!is.null(paramValueRangeVar)){
+  				dataRibbon <- dataSubjectPage[!(
+  					is.na(dataSubjectPage[, paramValueRangeVar[1]]) &
+  					is.na(dataSubjectPage[, paramValueRangeVar[2]])
+  				), ]
+  				if(length(dataRibbon) > 0){
+  					# use geom_ribbon instead of geom_rect in case different intervals for different time points
+  					aesRibbon <- list(
+  					  x = sym(timeVar), 
+  					  ymin = sym(paramValueRangeVar[1]), 
+              ymax = sym(paramValueRangeVar[2])
+  					)
+  				  gg <- gg + 
+  						geom_ribbon(
+  							mapping = do.call(aes, aesRibbon),
+  							data = dataRibbon,
+  							fill = colorValueRange, 
+  							alpha = 0.1
+  						)
+  				}
+  			}
+  			
+  			# line
+  			if(!is.null(paramNameVar)){
+  				# remove rows with only one point (no need to connect points with the line)
+  				# to avoid warning: geom_path: Each group consists of only one observation. Do you need to adjust the group aesthetic?
+  				# when 'facet_grid' is called
+  				nPointsPerParamName <- ddply(dataSubjectPage, "paramFacetVar", nrow)
+  				paramNameRetained <- nPointsPerParamName[which(nPointsPerParamName$V1 > 1), "paramFacetVar"]
+  				dataLine <- dataSubjectPage[which(dataSubjectPage[, "paramFacetVar"] %in% paramNameRetained), ]
+  			}else	dataLine <- dataSubjectPage
+  			if(nrow(dataLine) > 0)
+  				gg <- gg + geom_line(data = dataLine, alpha = alpha)
+  			
+  			# point
+  			aesArgsPoint <- c(
+  				if(!is.null(colorVar))	list(color = sym(colorVar), fill = sym(colorVar)),
+  				if(!is.null(shapeVar))	list(shape = sym(shapeVar))
+  			)
+  			
+  			if(length(aesArgsPoint) > 0){
+  			  argsGeomPoint <- list(
+  			    mapping = do.call(aes, aesArgsPoint), 
+  			    alpha = alpha, size = shapeSize
+  			  )
+  			  if(packageVersion("ggplot2") >= "3.5.0"){
+  			    showLegend <- c(
+  			      if(!is.null(colorVar)) c(color = TRUE, fill = TRUE),
+  			      if(!is.null(shapeVar))	c(shape = TRUE)
+  			    )
+  			    if(length(showLegend) > 0)
+  			      argsGeomPoint[["show.legend"]] <- showLegend
+  			  }
+  				gg <- gg + do.call(geom_point, argsGeomPoint)
+  			}else{
+  				gg <- gg + geom_point(alpha = alpha, size = shapeSize)
+  			}
+  			
+  			if(!is.null(title))
+  				gg <- gg + ggtitle(title)
+  			
+  			if(!is.null(xLab))
+  				gg <- gg + xlab(xLab)
+  			
+  			if(!is.null(yLab))
+  				gg <- gg + ylab(yLab)
+  			
+  			# general
+  			gg <- gg + 
+  				subjectProfileTheme() +
+  				theme(axis.text.y = element_text(size = 7))
+  			
+  			if(!is.null(paramNameVar)){
+  				
+  				gg <- gg + facet_grid(
+  					paste0("paramFacetVar", "~."), 
+  					scales = "free_y", switch = "y"#,
+  #					labeller = label_wrap_gen(width = Inf)
+  				)
+  				
+  				argsTheme <- list(
+  					strip.placement = "outside", 
+  					strip.background = element_rect(color = NA, fill = NA)
+  				)
+  				argsTheme <- c(argsTheme, 
+  					list(strip.text.y.left = element_text(angle = 0, size = 8, hjust = 1))
+  				)
+  				gg <- gg + do.call(theme, argsTheme)
+  			
+  				# count number of lines each facet will take
+  				nLinesPlot <- countNLines(unique(dataSubjectPage[, "paramFacetVar"]))
+  				nLinesPlot <- Vectorize(FUN = function(x){max(c(x, 4))})(nLinesPlot)
+  				
+  			}else	nLinesPlot <- 4
+  		
+  			# color palette and name for color legend
+  			if(!is.null(colorVar)){
+  				gg <- gg + 
+  					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
+  					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "fill")
+  			}else{
+  				gg <- gg + 
+  					scale_color_manual(values = colorPalette) +
+  					scale_fill_manual(values = colorPalette)
+  			}
+  		
+  			if(!is.null(shapeVar))
+  				gg <- gg + 
+  					getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")	
+  		
+  			argsScaleX <- c(
+  				if(!is.null(timeExpand))	list(expand = timeExpand),
+  				if(!is.null(timeTrans))	list(trans = timeTrans)
+  			)
+  			if(length(argsScaleX) > 0)
+  				gg <- gg + do.call("scale_x_continuous", argsScaleX)
+  		
+  			# set time limits for the x-axis
+  			# default: FALSE in case time limits are changed afterwards
+  			if(!is.null(timeLim)){
+  				timeLimSubject <- if(is.list(timeLim))	timeLim[[subject]]	else	timeLim
+  				gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
+  			}
+  		
+  			## extract number of lines
+  			
+  			# legend:
+  			nLinesLegendColor <- if(!is.null(colorVar)){
+  				getNLinesLegend(values = colorPalette, title = colorLab)
+  			}else	0
+  			nLinesLegendShape <- if(!is.null(shapeVar)){
+  				getNLinesLegend(values = shapePalette, title = shapeLab)
+  			}else	0
+  			nLinesLegend <- 0 +
+  				if(!is.null(colorVar) & !is.null(shapeVar)){
+  					# one legend (ggplot will create separate legend if the title differ)
+  					if(colorVar == shapeVar && !is.null(colorLab) & !is.null(shapeLab) && shapeLab == colorLab){
+  						nLinesLegendColor 
+  						# two legends
+  					}else{
+  						# 1 line to separate the two legends if color and shape are specified and different
+  						nLinesLegendColor + nLinesLegendShape + 1
+  					}
+  				}else	if(!is.null(colorVar)){
+  					nLinesLegendColor
+  				}else	if(!is.null(shapeVar)){
+  					nLinesLegendShape
+  				}else	0
+  		
+  			nLinesPlot <- max(sum(nLinesPlot), nLinesLegend)
+  			
+  			# in title and axes
+  			nLinesTitleAndXAxis <- sum(c(
+  				getNLinesLabel(value = title, elName = "title"), 
+  				getNLinesLabel(value = xLab, elName = "x")
+  			))
+  			nLines <- nLinesPlot + nLinesTitleAndXAxis
+  
+  			## set attributes
+  			
+  			attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
+  			class(gg) <- c("subjectProfileLinePlot", class(gg))
+  		
+  			gg
+  			
+  		})
+  		
+	  }
 		
 	})
 
 	# metaData:
 	# stored plot label
-	attr(listPlots, 'metaData') <- c(
-		list(label = label, timeLim = timeLim),
-		if(!is.null(timeTrans))	list(timeTrans = timeTrans),
-		if(!is.null(timeExpand))	list(timeExpand = timeExpand)
-	)
+	if (plotly) {
+	  attr(listPlots, 'metaData') <- c(
+	    list(label = label, timeLim = timeLim)
+	  )
+	} else {
+	  attr(listPlots, 'metaData') <- c(
+	    list(label = label, timeLim = timeLim),
+	    if(!is.null(timeTrans))	list(timeTrans = timeTrans),
+	    if(!is.null(timeExpand))	list(timeExpand = timeExpand)
+	  )
+	}
 	
 	return(listPlots)
 	
