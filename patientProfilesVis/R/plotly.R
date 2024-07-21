@@ -4,22 +4,12 @@
 #' This function is designed to called within a [plotly::plot_ly()] or
 #' [plotly::add_trace()] call for the `hovertemplate` argument.
 #'
-#' @param title a string, the tool tip title, ideally this is the parameter with
-#'   units appended
+#' @param title a string, the tool tip title
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
-#' @param colorVal an optional string or numeric value, the data value that
-#'   corresponds to the current color
-#' @param shapeVal an optional string or numeric value, the data value that
-#'   corresponds to the current shape
-#' @param visit an optional string, the visit name
-#' @param date an optional string or date, the date
+#' @inheritParams plotlyLinePlot
 #' @param lln,uln optional numeric values, the lower and upper limit normal
 #'   values, respectively
-#' @param grade an optional string or numeric value, the grade. If value is `""`
-#'   or `NA`, grade will not be included in the hover template.
-#' @param alert an optional string, the alerts criteria violated. If value is
-#'   `""` or `NA`, grade will not be included in the hover template.
 #'
 #' @returns a string with html formatting
 #' 
@@ -160,25 +150,15 @@ convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
 #' @param data a data frame with data for 1 subject only
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
-#' @param visitVar an optional string, the column name in `data` with the visit 
-#'   name
-#' @param dateVar an optional string, the column name in `data` with the date
-#' @param gradeVar an optional string, the column name in `data` with the grade
-#' @param alertVar an optional string, the column name in `data` with the alert 
-#'   information
-#' @param facetVarMaxLength a numeric value, the maximum number of characters 
-#'   allowed in an entry in the `data$paramFacetVar` column before line 
-#'   breaks will be added at every space
-#' @param margin a named list of numeric values specifying the plot margins,
-#'   names should be `l` (left), `r` (right), `b` (bottom), `t` (top), and `pad`
-#'   (padding); default is `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. 
-#'   This argument, particularly the left margin, can be adjusted along with 
-#'   `yaxis_title_shift` to adjust the y-axis title location
-#' @param yaxis_title_shift a numeric value, adjust y-axis title offset, works
-#'   with `margin` argument
-#' @param spikecolor a string, the spike line color; default is `'red'`
+#' @param add_vars see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param facetVarMaxLength see [subjectProfileLinePlot()] argument
+#'   `plotly_args`
+#' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param yaxis_title_shift see [subjectProfileLinePlot()] argument
+#'   `plotly_args`
+#' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
 #' 
-#' @returns a plotly object
+#' @returns a [plotly] object
 #' @export
 #'
 plotlyLinePlot <- function(data,
@@ -198,7 +178,7 @@ plotlyLinePlot <- function(data,
                            timeLab,
                            title,
                            xLab,
-                           tooltip_add_vars = NULL,
+                           add_vars = NULL,
                            facetVarMaxLength = 30,
                            margin = list(
                              l = 250,
@@ -233,8 +213,8 @@ plotlyLinePlot <- function(data,
     llnDat <- NULL
     ulnDat <- NULL
   }
-  if (!is.null(tooltip_add_vars)) {
-    tooltip_add_vars <- purrr::map(tooltip_add_vars, \(x) data[[x]])
+  if (!is.null(add_vars)) {
+    add_vars <- purrr::map(add_vars, \(x) data[[x]])
   }
   data <- dplyr::mutate(
     data,
@@ -250,7 +230,7 @@ plotlyLinePlot <- function(data,
       shapeVar = shapeVarDat,
       lln = llnDat,
       uln = ulnDat,
-      add_vars = tooltip_add_vars
+      add_vars = add_vars
     )
   )
   

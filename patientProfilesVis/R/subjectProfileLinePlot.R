@@ -1,39 +1,65 @@
-#' Visualize subject profiles of the evolution of 
-#' continuous parameters versus time (spaghetti plot).
-#' @param paramValueVar String, variable of \code{data} 
-#' with parameter value to represent.\cr
-#' Records with missing values are discarded.
-#' @param paramNameVar Character vector with variable(s) of \code{data} with parameter name.
-#' If multiple, they are concatenated with \code{paramVarSep}.
-#' @param paramLab Named character vector, 
-#' with label for the parameter variable(s) (\code{paramNameVar}).\cr
-#' This is used to set the default title.
-#' @param paramVarSep string with character(s) used to concatenate multiple 
-#' \code{paramNameVar}, ' - ' by default.
-#' @param paramValueRangeVar Character vector of length 2 containing 
-#' variables of \code{data} with minimum and maximum value 
-#' for \code{paramValueVar}, typically reference range indicators.\cr
-#' Range can differ per parameter and even per time point.
-#' This range is represented as a ribbon in the plot background.
-#' e.g. to represent the reference range of the variable.
-#' @param colorValueRange String with color for the filling of 
-#' the ribbon represented by \code{paramValueRangeVar}.
-#' @param colorVar String, variable of \code{data} with color.
-#' This variable is used
-#' for the colors and the filling of the points.
-#' @param yLimFrom String with specification on the limits of the y-axis, either:
+#' Visualize subject profiles of the evolution of continuous parameters versus
+#' time (spaghetti plot).
+#' @param paramValueVar String, variable of \code{data} with parameter value to
+#'   represent.\cr Records with missing values are discarded.
+#' @param paramNameVar Character vector with variable(s) of \code{data} with
+#'   parameter name. If multiple, they are concatenated with \code{paramVarSep}.
+#' @param paramLab Named character vector, with label for the parameter
+#'   variable(s) (\code{paramNameVar}).\cr This is used to set the default
+#'   title.
+#' @param paramVarSep string with character(s) used to concatenate multiple
+#'   \code{paramNameVar}, ' - ' by default.
+#' @param paramValueRangeVar Character vector of length 2 containing variables
+#'   of \code{data} with minimum and maximum value for \code{paramValueVar},
+#'   typically reference range indicators.\cr Range can differ per parameter and
+#'   even per time point. This range is represented as a ribbon in the plot
+#'   background. e.g. to represent the reference range of the variable.
+#' @param colorValueRange String with color for the filling of the ribbon
+#'   represented by \code{paramValueRangeVar}.
+#' @param colorVar String, variable of \code{data} with color. This variable is
+#'   used for the colors and the filling of the points.
+#' @param yLimFrom String with specification on the limits of the y-axis,
+#'   either:
 #' \itemize{
-#' \item{'all' (by default): for each parameter (\code{paramNameVar}), 
-#' the y-axis range contains the minimum/maximum value of 
+#' \item{'all' (by default): for each parameter (\code{paramNameVar}),
+#' the y-axis range contains the minimum/maximum value of
 #' the reference range (\code{paramValueRangeVar}) or data}
-#' \item{'value': for each parameter (\code{paramNameVar}), 
+#' \item{'value': for each parameter (\code{paramNameVar}),
 #' the y-axis minimum/maximum value is restricted to the data range only.
 #' Please note that the ribbon visualizing the reference range is also restricted
 #' to the data range if wider.}
 #' }
-#' @param shapeSize Size for the symbols, any integer or 
-#' object supported by \code{size} in \code{\link[ggplot2]{geom_point}}.
-#' @param title String with title, label of the parameter value variable by default.
+#' @param shapeSize Size for the symbols, any integer or object supported by
+#'   \code{size} in \code{\link[ggplot2]{geom_point}}.
+#' @param title String with title, label of the parameter value variable by
+#'   default.
+#' @param plotly a logical value, `TRUE` for [plotly] output, `FALSE` for a
+#'   [ggplot2] output; default is `FALSE`
+#' @param plotly_args a list with the following named values:
+#'   \itemize{
+#'     \item{`paramValueVarUnits`}{"an optional string, the column in `data`
+#'       with the parameter's units which will be added to the tooltip
+#'       information; default is `NULL`"} 
+#'     \item{`add_vars`}{"an optional
+#'       named list with additional data that should be added to the plotly
+#'       tooltip. The names are the labels in the tooltip and the values are the
+#'       columns in `data` where the values will be pulled from; default is
+#'       `NULL`"} 
+#'     \item{`facetVarMaxLength`}{"a numeric value, the maximum number
+#'       of characters allowed in an entry in the `data$paramFacetVar` column
+#'       before line breaks will be added at every space"} 
+#'     \item{`margin`}{"a
+#'       named list of numeric values specifying the plot margins, names should be
+#'       `l` (left), `r` (right), `b` (bottom), `t` (top), and `pad` (padding);
+#'       default is `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This
+#'       argument, particularly the left margin, can be adjusted along with
+#'       `yaxis_title_shift` to adjust the y-axis title location"}
+#'     \item{`yaxis_title_shift`}{"a numeric value (typically negative), adjusts
+#'       y-axis title offset. This values works with `margin` argument. Default is
+#'       `-0.035`"} 
+#'     \item{`spikecolor`}{"a string, the spike line color; default
+#'       is `'red'`"}
+#'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams getPageVar
@@ -82,7 +108,7 @@ subjectProfileLinePlot <- function(
 	plotly = FALSE,
 	plotly_args = list(
 	  paramValueVarUnits = NULL,
-	  tooltip_add_vars = NULL,
+	  add_vars = NULL,
 	  facetVarMaxLength = 30,
 	  margin = list(
 	    l = 250,
@@ -231,7 +257,7 @@ subjectProfileLinePlot <- function(
         timeLab = timeLab,
         title = title,
         xLab = xLab,
-        tooltip_add_vars = plotly_args$tooltip_add_vars,
+        add_vars = plotly_args$add_vars,
         facetVarMaxLength = plotly_args$facetVarMaxLength,
         margin = plotly_args$margin,
         yaxis_title_shift = plotly_args$yaxis_title_shift,

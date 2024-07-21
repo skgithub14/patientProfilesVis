@@ -327,7 +327,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = list(
+    add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     )
@@ -352,7 +352,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = list(
+    add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     )
@@ -377,7 +377,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = list(
+    add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     )
@@ -402,7 +402,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = list(
+    add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     )
@@ -427,13 +427,13 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = list(
+    add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     )
   )
   
-  # plot without tooltip_add_vars
+  # plot without add_vars
   p <- plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -452,7 +452,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     timeLab = "Study Day",
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
-    tooltip_add_vars = NULL
+    add_vars = NULL
   )
 })
 
