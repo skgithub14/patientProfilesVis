@@ -38,7 +38,8 @@ Imports:
     plotly,
     purrr,
     dplyr,
-    rlang
+    rlang,
+    forcats
 Suggests: 
   pander, 
   shiny, 
