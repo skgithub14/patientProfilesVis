@@ -309,7 +309,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   data[, "paramFacetVar"] <- interactionWithMissing(data = data, vars = paramNameVar, varSep = paramVarSep)
   
   # plot with all elements
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = "LBSTRESU",
@@ -334,7 +334,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
   
   # plot without units
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = NULL,
@@ -359,7 +359,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
   
   # plot without colors
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = "LBSTRESU",
@@ -384,7 +384,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
   
   # plot without shapes
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = "LBSTRESU",
@@ -409,7 +409,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
   
   # plot without ranges
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = "LBSTRESU",
@@ -434,7 +434,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
   
   # plot without add_vars
-  p <- plotlyLinePlot(
+  plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
     paramValueVarUnits = "LBSTRESU",
@@ -471,7 +471,7 @@ test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
-  p <- subjectProfileLinePlot(
+  subjectProfileLinePlot(
     data = data,
     paramNameVar = "LBTEST",
     paramValueVar = "LBSTRESN", 
@@ -504,7 +504,7 @@ test_that("subjectProfileLinePlot() can produce plotly outputs for more than 1 s
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
-  p <- subjectProfileLinePlot(
+  subjectProfileLinePlot(
     data = data,
     paramNameVar = "LBTEST",
     paramValueVar = "LBSTRESN", 
