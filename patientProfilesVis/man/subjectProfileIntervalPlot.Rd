@@ -50,7 +50,8 @@ subjectProfileIntervalPlot(
   caption,
   labelVars = NULL,
   formatReport = subjectProfileReportFormat(),
-  paging = TRUE
+  paging = TRUE,
+  plotly = FALSE
 )
 }
 \arguments{
@@ -224,6 +225,8 @@ Please note that the size of the graphic window
 to be re-sized in order that the plot fits.
 \cr
 If FALSE, the entire plot is included in one single page.}
+
+\item{plotly}{Boolean. If TRUE, generate a plotly output, if not, ggplot.}
 }
 \value{
 list of (across subjects) of list (across pages) 
