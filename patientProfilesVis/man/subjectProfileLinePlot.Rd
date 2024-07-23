@@ -47,8 +47,8 @@ subjectProfileLinePlot(
   shapeSize = rel(1),
   plotly = FALSE,
   plotly_args = list(paramValueVarUnits = NULL, add_vars = NULL, facetVarMaxLength = 30,
-    margin = list(l = 250, r = 50, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035,
-    spikecolor = "red")
+    margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035,
+    legend_x_shift = 1.2, spikecolor = "red")
 )
 }
 \arguments{
@@ -213,7 +213,8 @@ If FALSE, the entire plot is included in one single page.}
 \item{alpha}{Numeric with transparency, 1 by default.}
 
 \item{shapeSize}{Size for the symbols, any integer or object supported by
-\code{size} in \code{\link[ggplot2]{geom_point}}.}
+\code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`, 
+recommend setting this value to `7` or higher.}
 
 \item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
 [ggplot2] output; default is `FALSE`}
@@ -231,17 +232,20 @@ If FALSE, the entire plot is included in one single page.}
   \item{`facetVarMaxLength`}{"a numeric value, the maximum number
     of characters allowed in an entry in the `data$paramFacetVar` column
     before line breaks will be added at every space"} 
-  \item{`margin`}{"a
-    named list of numeric values specifying the plot margins, names should be
-    `l` (left), `r` (right), `b` (bottom), `t` (top), and `pad` (padding);
-    default is `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This
-    argument, particularly the left margin, can be adjusted along with
-    `yaxis_title_shift` to adjust the y-axis title location"}
+  \item{`margin`}{"a named list of numeric values specifying the plot 
+    margins, names should be `l` (left), `r` (right), `b` (bottom), 
+    `t` (top), and `pad` (padding); default is 
+    `list(l = 250, r = 250, b = 75, t = 50, pad = 4)`. This argument can be 
+    adjusted along with `yaxis_title_shift` and/or `legend_x_shift` to 
+    adjust the y-axis title location and legend positions, respectively, in 
+    relationship to the plotting area."}
   \item{`yaxis_title_shift`}{"a numeric value (typically negative), adjusts
-    y-axis title offset. This values works with `margin` argument. Default is
-    `-0.035`"} 
-  \item{`spikecolor`}{"a string, the spike line color; default
-    is `'red'`"}
+    y-axis title offset. This values works with `margin` argument, 
+    specifically the left margin. Default is `-0.035`."} 
+  \item{`legend_x_shift`}{"a numeric value (typically a decimal > 1), 
+    adjusts legend x position. This values works with `margin` argument, 
+    specifically the right margin. Default is `1.2`."} 
+  \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
 }}
 }
 \value{

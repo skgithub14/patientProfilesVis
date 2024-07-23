@@ -90,11 +90,11 @@ linePlotHoverTemplate <- function(title,
 }
 
 
-#' Convert [ggplot] shape to [plotly] symbol
+#' Convert [ggplot2] shape to [plotly] symbol
 #'
 #' @param shapes a numeric or character vector representing [ggplot2] shapes
 #'
-#' @returns a string, the corresponding plotly shape name
+#' @returns a character vector, the corresponding [plotly] shape name
 #'
 convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
   
@@ -142,6 +142,58 @@ convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
 }
 
 
+#' Convert [ggplot2] shape to unicode character
+#'
+#' @param shapes a numeric or character vector representing [ggplot2] shapes
+#'
+#' @returns a character vector of unicode symbols
+#'
+convert_ggplot_shapes_to_unicode <- function(shapes) {
+  
+  convert_shape <- function(shape) {
+    
+    # convert ggplot shape from character to numeric
+    if (!grepl("^[[:digit:]]+L*$", shape)) {
+      shape <- ggplot2::translate_shape_string(shape)
+    }
+    
+    shape <- as.character(shape)
+    switch(
+      shape,
+      "0" = "\u25A1", # "square-open",
+      "1" = "\u2B58", # "circle-open",
+      "2" = "\u25B3", # "triangle-up-open",
+      "3" = "\U1F7A2", # "cross-thin",
+      "4" = "\u2A2F", # "x-thin",
+      "5" = "\u25C7", # "diamond-open",
+      "6" = "\u25BD", # "triangle-down-open",
+      "7" = "\u22A0", # "square-x-open",
+      "8" = "\u002A", # "asterisk-open", # no equivalent
+      # "9" = "", # "diamond-cross-open",
+      "10" = "\u2295", # "circle-cross-open",
+      # "11" = "\u29D6", # "hourglass-open", # no equivalent
+      "12" = "\u229E", # "square-cross-open",
+      "13" = "\u2297", # "circle-x-open",
+      # "14" # no equivalent
+      "15" = "\u25A0", # "square-dot", 
+      "16" = "\u25CF", # "circle-dot", 
+      "17" = "\u25B2", # "triangle-up",
+      "18" = "\u25C6", # "diamond-dot",
+      "19" = "\u25CF", # "circle-dot",
+      "20" = "\u25CF", # "circle-dot",
+      "21" = "\u25CF", # "circle-dot",
+      "22" = "\u25A0", # "square-dot",
+      "23" = "\u25C6", # "diamond-dot",
+      "24" = "\u25B2", # "triangle-up",
+      "25" = "\u25BC", # "triangle-down",
+      stop(paste("no unicode equivalent to ggplot shape", shape))
+    )
+  }
+  
+  purrr::map_chr(shapes, \(shape) convert_shape(shape))
+}
+
+
 #' Create a plotly line plot facetted by paramFacetVar
 #' 
 #' @details 
@@ -156,6 +208,7 @@ convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
 #' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param yaxis_title_shift see [subjectProfileLinePlot()] argument
 #'   `plotly_args`
+#' @param legend_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
 #' 
 #' @returns a [plotly] object
@@ -182,12 +235,13 @@ plotlyLinePlot <- function(data,
                            facetVarMaxLength = 30,
                            margin = list(
                              l = 250,
-                             r = 50,
+                             r = 250,
                              b = 75,
                              t = 50,
                              pad = 4
                            ),
                            yaxis_title_shift = -0.035,
+                           legend_x_shift = 1.2,
                            spikecolor = 'red') {
   
   # create tool tip column in data
@@ -247,6 +301,9 @@ plotlyLinePlot <- function(data,
   # create a shape symbol column in the data
   if (!is.null(shapeVar)) {
     shapePalettePlotly <- convert_ggplot_shapes_to_plotly_symbols(
+      shapes = shapePalette
+    )
+    shapePaletteUnicode <- convert_ggplot_shapes_to_unicode(
       shapes = shapePalette
     )
   }
@@ -396,6 +453,51 @@ plotlyLinePlot <- function(data,
       'hoverCompareCartesian'
     )
   )
+  
+  # add legend as annotation
+  if (!is.null(shapeVar) | !is.null(colorVar)) {
+    
+    if (!is.null(shapeVar)) {
+      shapeLegendText <- purrr::imap(shapePaletteUnicode, ~ {
+        paste0(.x, "   ", .y, "<br>")
+      }) %>%
+        purrr::reduce(paste0) %>%
+        paste0("<b>", shapeLab, " Shapes</b><br>", .)
+    } else {
+      shapeLegendText <- NULL
+    }
+    
+    if (!is.null(colorVar)) {
+      colorLegendText <- purrr::imap(colorPalette, ~ {
+        paste0("<span style='color: ", .x, ";'>&#x1f534;&#xfe0e;</span>   ", .y, "<br>")
+      }) %>%
+        purrr::reduce(paste0) %>%
+        paste0("<b>", colorLab , " Colors</b><br>", .)
+    } else {
+      colorLegendText <- NULL
+    }
+    
+    if (!is.null(shapeLegendText) & !is.null(colorLegendText)) {
+      legendText <- paste0(shapeLegendText, "<br><br>", colorLegendText)
+    } else if (!is.null(shapeLegendText)) {
+      legendText <- shapeLegendText
+    } else {
+      legendText <- colorLegendText
+    }
+    
+    plots <- plotly::add_annotations(
+      plots,
+      text = legendText,
+      xref = "paper",
+      yref = "paper",
+      x = legend_x_shift,
+      y = 0.75,
+      xanchor = "right",
+      yanchor = "bottom",
+      showarrow = FALSE,
+      align = "left"
+    )
+  }
     
   return(plots)
 }

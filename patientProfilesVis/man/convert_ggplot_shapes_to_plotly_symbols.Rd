@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotly.R
 \name{convert_ggplot_shapes_to_plotly_symbols}
 \alias{convert_ggplot_shapes_to_plotly_symbols}
-\title{Convert [ggplot] shape to [plotly] symbol}
+\title{Convert [ggplot2] shape to [plotly] symbol}
 \usage{
 convert_ggplot_shapes_to_plotly_symbols(shapes)
 }
@@ -10,8 +10,8 @@ convert_ggplot_shapes_to_plotly_symbols(shapes)
 \item{shapes}{a numeric or character vector representing [ggplot2] shapes}
 }
 \value{
-a string, the corresponding plotly shape name
+a character vector, the corresponding [plotly] shape name
 }
 \description{
-Convert [ggplot] shape to [plotly] symbol
+Convert [ggplot2] shape to [plotly] symbol
 }

@@ -114,7 +114,10 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
     shapeVar = "NORMAL",
     lln = 0,
     uln = 2,
-    add_vars = list(Date = "2020-01-01", Alert = "ALB >= 1", Grade = NA, Visit = "")
+    add_vars = list(Date = "2020-01-01", 
+                    Alert = "ALB >= 1", 
+                    Grade = NA, 
+                    Visit = "")
   )
   
   expect_equal(
@@ -306,7 +309,9 @@ test_that("plotlyLinePlot() generates a line plot", {
   data[, "yVar"] <- data[, paramValueVar]
   paramNameVar <- c("LBTEST", "LBSTRESU")
   paramVarSep <- " - "
-  data[, "paramFacetVar"] <- interactionWithMissing(data = data, vars = paramNameVar, varSep = paramVarSep)
+  data[, "paramFacetVar"] <- interactionWithMissing(data = data, 
+                                                    vars = paramNameVar, 
+                                                    varSep = paramVarSep)
   
   # plot with all elements
   plotlyLinePlot(
@@ -408,6 +413,31 @@ test_that("plotlyLinePlot() generates a line plot", {
     )
   )
   
+  # plot without colors or shapes
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette = NULL,
+    alpha = 1,
+    shapeVar = NULL,
+    shapeLab = NULL,
+    shapePalette = NULL,
+    shapeSize = 7,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    add_vars = list(
+      Date = "LBDTC",
+      `Range Indicator` = "LBNRIND"
+    )
+  )
+  
   # plot without ranges
   plotlyLinePlot(
     data = data,
@@ -471,7 +501,7 @@ test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
-  subjectProfileLinePlot(
+  p <- subjectProfileLinePlot(
     data = data,
     paramNameVar = "LBTEST",
     paramValueVar = "LBSTRESN", 
@@ -482,12 +512,14 @@ test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
     timeVar = "LBDY",
     title = "Laboratory test measurements: actual value",
     labelVars = labelVarsSDTM,
-    shapeSize = rel(1),
+    shapeSize = 7,
     plotly = TRUE,
     plotly_args = list(
       paramValueVarUnits = "LBSTRESU"
     )
   )
+  
+  p$`01-704-1445`
   
 })
 
@@ -504,7 +536,7 @@ test_that("subjectProfileLinePlot() can produce plotly outputs for more than 1 s
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
-  subjectProfileLinePlot(
+  p <- subjectProfileLinePlot(
     data = data,
     paramNameVar = "LBTEST",
     paramValueVar = "LBSTRESN", 
@@ -514,5 +546,8 @@ test_that("subjectProfileLinePlot() can produce plotly outputs for more than 1 s
     shapeSize = 7,
     plotly = TRUE
   )
+  
+  p$`01-701-1192`
+  p$`01-704-1445`
   
 })

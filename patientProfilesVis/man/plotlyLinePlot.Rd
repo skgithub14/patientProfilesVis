@@ -24,8 +24,9 @@ plotlyLinePlot(
   xLab,
   add_vars = NULL,
   facetVarMaxLength = 30,
-  margin = list(l = 250, r = 50, b = 75, t = 50, pad = 4),
+  margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4),
   yaxis_title_shift = -0.035,
+  legend_x_shift = 1.2,
   spikecolor = "red"
 )
 }
@@ -84,7 +85,8 @@ e.g. 'cross' instead of \code{4}, in case Unicode
 symbols should also be used.}
 
 \item{shapeSize}{Size for the symbols, any integer or object supported by
-\code{size} in \code{\link[ggplot2]{geom_point}}.}
+\code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`, 
+recommend setting this value to `7` or higher.}
 
 \item{timeVar}{String, variable of \code{data} with time,
 displayed in the x axis.\cr
@@ -110,6 +112,8 @@ and for the default label of the x-axis.}
 `plotly_args`}
 
 \item{spikecolor}{see [subjectProfileLinePlot()] argument `plotly_args`}
+
+\item{legend_y_shift}{see [subjectProfileLinePlot()] argument `plotly_args`}
 }
 \value{
 a [plotly] object

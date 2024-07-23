@@ -30,7 +30,8 @@
 #' to the data range if wider.}
 #' }
 #' @param shapeSize Size for the symbols, any integer or object supported by
-#'   \code{size} in \code{\link[ggplot2]{geom_point}}.
+#'   \code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`, 
+#'   recommend setting this value to `7` or higher.
 #' @param title String with title, label of the parameter value variable by
 #'   default.
 #' @param plotly a logical value, `TRUE` for [plotly] output, `FALSE` for a
@@ -48,17 +49,20 @@
 #'     \item{`facetVarMaxLength`}{"a numeric value, the maximum number
 #'       of characters allowed in an entry in the `data$paramFacetVar` column
 #'       before line breaks will be added at every space"} 
-#'     \item{`margin`}{"a
-#'       named list of numeric values specifying the plot margins, names should be
-#'       `l` (left), `r` (right), `b` (bottom), `t` (top), and `pad` (padding);
-#'       default is `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This
-#'       argument, particularly the left margin, can be adjusted along with
-#'       `yaxis_title_shift` to adjust the y-axis title location"}
+#'     \item{`margin`}{"a named list of numeric values specifying the plot 
+#'       margins, names should be `l` (left), `r` (right), `b` (bottom), 
+#'       `t` (top), and `pad` (padding); default is 
+#'       `list(l = 250, r = 250, b = 75, t = 50, pad = 4)`. This argument can be 
+#'       adjusted along with `yaxis_title_shift` and/or `legend_x_shift` to 
+#'       adjust the y-axis title location and legend positions, respectively, in 
+#'       relationship to the plotting area."}
 #'     \item{`yaxis_title_shift`}{"a numeric value (typically negative), adjusts
-#'       y-axis title offset. This values works with `margin` argument. Default is
-#'       `-0.035`"} 
-#'     \item{`spikecolor`}{"a string, the spike line color; default
-#'       is `'red'`"}
+#'       y-axis title offset. This values works with `margin` argument, 
+#'       specifically the left margin. Default is `-0.035`."} 
+#'     \item{`legend_x_shift`}{"a numeric value (typically a decimal > 1), 
+#'       adjusts legend x position. This values works with `margin` argument, 
+#'       specifically the right margin. Default is `1.2`."} 
+#'     \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
 #'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
@@ -112,12 +116,13 @@ subjectProfileLinePlot <- function(
 	  facetVarMaxLength = 30,
 	  margin = list(
 	    l = 250,
-	    r = 50,
+	    r = 250,
 	    b = 75,
 	    t = 50,
 	    pad = 4
 	  ),
 	  yaxis_title_shift = -0.035,
+	  legend_x_shift = 1.2,
 	  spikecolor = 'red'
 	)
 ){
@@ -230,10 +235,13 @@ subjectProfileLinePlot <- function(
 	      plotly_args$facetVarMaxLength <- 30
 	    }
 	    if (is.null(plotly_args$margin)) {
-	      plotly_args$margin <- list(l = 250, r = 50, b = 75, t = 50, pad = 4)
+	      plotly_args$margin <- list(l = 250, r = 250, b = 75, t = 50, pad = 4)
 	    }
 	    if (is.null(plotly_args$yaxis_title_shift)) {
 	      plotly_args$yaxis_title_shift <- -0.035
+	    }
+	    if (is.null(plotly_args$legend_x_shift)) {
+	      plotly_args$legend_x_shift <- 1.2
 	    }
 	    if (is.null(plotly_args$spikecolor)) {
 	      plotly_args$spikecolor <- 'red'
