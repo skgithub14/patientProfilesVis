@@ -84,8 +84,10 @@ used to align the plots in the final report.}
 
 \item{timeTrans}{transformation for the time variable, 
 (see \code{trans} parameter in \code{\link[ggplot2]{scale_x_continuous}}, and
-\code{\link[scales]{trans_new}}).
-For example, produced by the \code{\link{getTimeTrans}} function.}
+\code{\link[scales]{trans_new}}). 
+For example, produced by the \code{\link{getTimeTrans}} function. This 
+argument is ignored for plotly outputs; if relevant see 
+`plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
 (see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}

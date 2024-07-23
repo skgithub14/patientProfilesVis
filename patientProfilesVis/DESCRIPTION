@@ -36,6 +36,9 @@ Imports:
     scales,
     utils,
     plotly,
+    purrr,
+    dplyr,
+    rlang,
     forcats
 Suggests: 
   pander, 
