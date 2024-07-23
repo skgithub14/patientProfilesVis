@@ -27,7 +27,9 @@ plotlyLinePlot(
   margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4),
   yaxis_title_shift = -0.035,
   legend_x_shift = 1.2,
-  spikecolor = "red"
+  spikecolor = "red",
+  log_x_axis = NULL,
+  log_footnote_y_shift = -0.1
 )
 }
 \arguments{
@@ -112,6 +114,11 @@ and for the default label of the x-axis.}
 `plotly_args`}
 
 \item{spikecolor}{see [subjectProfileLinePlot()] argument `plotly_args`}
+
+\item{log_x_axis}{see [subjectProfileLinePlot()] argument `plotly_args`}
+
+\item{log_footnote_y_shift}{see [subjectProfileLinePlot()] argument
+`plotly_args`}
 
 \item{legend_y_shift}{see [subjectProfileLinePlot()] argument `plotly_args`}
 }

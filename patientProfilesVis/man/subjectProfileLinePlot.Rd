@@ -48,7 +48,8 @@ subjectProfileLinePlot(
   plotly = FALSE,
   plotly_args = list(paramValueVarUnits = NULL, add_vars = NULL, facetVarMaxLength = 30,
     margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035,
-    legend_x_shift = 1.2, spikecolor = "red")
+    legend_x_shift = 1.2, spikecolor = "red", log_x_axis = NULL, log_footnote_y_shift =
+    -0.1)
 )
 }
 \arguments{
@@ -141,8 +142,10 @@ and for the default label of the x-axis.}
 
 \item{timeTrans}{transformation for the time variable, 
 (see \code{trans} parameter in \code{\link[ggplot2]{scale_x_continuous}}, and
-\code{\link[scales]{trans_new}}).
-For example, produced by the \code{\link{getTimeTrans}} function.}
+\code{\link[scales]{trans_new}}). 
+For example, produced by the \code{\link{getTimeTrans}} function. This 
+argument is ignored for plotly outputs; if relevant see 
+`plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
 (see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
@@ -246,6 +249,16 @@ recommend setting this value to `7` or higher.}
     adjusts legend x position. This values works with `margin` argument, 
     specifically the right margin. Default is `1.2`."} 
   \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
+  \item{`log_x_axis`}{"an optional string indicating if and how the x-axis 
+    should be scaled. If `'neg'`, only the negative values are scaled, if 
+    `'pos'` only the positive values are scaled, if `'both'` the positive 
+    and negative values are scaled. Default is `NULL`, in which case the 
+    default [plotly] x-axis scale is used."}
+  \item{`log_footnote_y_shift`}{"a numeric value used to control the y 
+    position of the x-axis log scale footnote; only applicable if 
+    `log_x_axis` is not `NULL`. This is typically a negative number between 
+    0 and -1 and it works with the `margin` argument, specifically the 
+    bottom margin. Default is `-0.1`."}
 }}
 }
 \value{

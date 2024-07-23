@@ -51,7 +51,8 @@ subjectProfileIntervalPlot(
   labelVars = NULL,
   formatReport = subjectProfileReportFormat(),
   paging = TRUE,
-  plotly = FALSE
+  plotly = FALSE,
+  plotly_hover_text = NULL
 )
 }
 \arguments{
@@ -145,8 +146,10 @@ displayed in a message and in the plot caption.}
 
 \item{timeTrans}{transformation for the time variable, 
 (see \code{trans} parameter in \code{\link[ggplot2]{scale_x_continuous}}, and
-\code{\link[scales]{trans_new}}).
-For example, produced by the \code{\link{getTimeTrans}} function.}
+\code{\link[scales]{trans_new}}). 
+For example, produced by the \code{\link{getTimeTrans}} function. This 
+argument is ignored for plotly outputs; if relevant see 
+`plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
 (see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
@@ -227,6 +230,9 @@ to be re-sized in order that the plot fits.
 If FALSE, the entire plot is included in one single page.}
 
 \item{plotly}{Boolean. If TRUE, generate a plotly output, if not, ggplot.}
+
+\item{plotly_hover_text}{Named vector. If provided, plotly hover will include
+this information, in form of `<b>Name</b>: value`}
 }
 \value{
 list of (across subjects) of list (across pages) 

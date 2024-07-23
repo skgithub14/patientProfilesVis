@@ -63,6 +63,16 @@
 #'       adjusts legend x position. This values works with `margin` argument, 
 #'       specifically the right margin. Default is `1.2`."} 
 #'     \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
+#'     \item{`log_x_axis`}{"an optional string indicating if and how the x-axis 
+#'       should be scaled. If `'neg'`, only the negative values are scaled, if 
+#'       `'pos'` only the positive values are scaled, if `'both'` the positive 
+#'       and negative values are scaled. Default is `NULL`, in which case the 
+#'       default [plotly] x-axis scale is used."}
+#'     \item{`log_footnote_y_shift`}{"a numeric value used to control the y 
+#'       position of the x-axis log scale footnote; only applicable if 
+#'       `log_x_axis` is not `NULL`. This is typically a negative number between 
+#'       0 and -1 and it works with the `margin` argument, specifically the 
+#'       bottom margin. Default is `-0.1`."}
 #'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
@@ -123,7 +133,9 @@ subjectProfileLinePlot <- function(
 	  ),
 	  yaxis_title_shift = -0.035,
 	  legend_x_shift = 1.2,
-	  spikecolor = 'red'
+	  spikecolor = 'red',
+	  log_x_axis = NULL,
+	  log_footnote_y_shift = -0.1
 	)
 ){
 	
@@ -246,6 +258,9 @@ subjectProfileLinePlot <- function(
 	    if (is.null(plotly_args$spikecolor)) {
 	      plotly_args$spikecolor <- 'red'
 	    }
+	    if (is.null(plotly_args$log_footnote_y_shift)) {
+	      plotly_args$log_footnote_y_shift <- -0.1
+	    }
 	    
 	    pltly <- plotlyLinePlot(
 	      data = dataSubject,
@@ -269,7 +284,10 @@ subjectProfileLinePlot <- function(
         facetVarMaxLength = plotly_args$facetVarMaxLength,
         margin = plotly_args$margin,
         yaxis_title_shift = plotly_args$yaxis_title_shift,
-        spikecolor = plotly_args$spikecolor
+	      legend_x_shift = plotly_args$legend_x_shift,
+        spikecolor = plotly_args$spikecolor,
+	      log_x_axis = plotly_args$log_x_axis,
+	      log_footnote_y_shift = plotly_args$log_footnote_y_shift
 	    )
 	    
 	    ## set attributes

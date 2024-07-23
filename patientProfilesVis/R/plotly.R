@@ -210,6 +210,9 @@ convert_ggplot_shapes_to_unicode <- function(shapes) {
 #'   `plotly_args`
 #' @param legend_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param log_footnote_y_shift see [subjectProfileLinePlot()] argument
+#'   `plotly_args`
 #' 
 #' @returns a [plotly] object
 #' @export
@@ -242,7 +245,60 @@ plotlyLinePlot <- function(data,
                            ),
                            yaxis_title_shift = -0.035,
                            legend_x_shift = 1.2,
-                           spikecolor = 'red') {
+                           spikecolor = 'red',
+                           log_x_axis = NULL,
+                           log_footnote_y_shift = -0.1) {
+  
+  # log the x-axis
+  if (!is.null(log_x_axis)) {
+    if (!log_x_axis %in% c("pos", "neg", "both")) {
+      stop("log_x_axis must be either NULL, 'pos', 'neg', or 'both'")
+    }
+    
+    if (log_x_axis == "pos") {
+      data <- dplyr::mutate(
+        data,
+        timeVarLog = dplyr::if_else(
+          !!rlang::sym(timeVar) > 0,
+          log(abs(!!rlang::sym(timeVar))),
+          !!rlang::sym(timeVar)
+        )
+      )
+      footnote <- paste(
+        "Note: positive", timeLab, 
+        "values are plotted on a log scale; however", timeLab, 
+        "values in tooltip reflect actual data."
+      )
+    } else if (log_x_axis == "neg") {
+      data <- dplyr::mutate(
+        data,
+        timeVarLog = dplyr::if_else(
+          !!rlang::sym(timeVar) < 0,
+          -1 * log(abs(!!rlang::sym(timeVar))),
+          !!rlang::sym(timeVar)
+        )
+      )
+      footnote <- paste(
+        "Note: negative", timeLab, 
+        "values are plotted on a log scale; however", timeLab, 
+        "values in tooltip reflect actual data."
+      )
+    } else {
+      data <- dplyr::mutate(
+        data,
+        timeVarLog = dplyr::case_when(
+          !!rlang::sym(timeVar) > 0 ~ log(abs(!!rlang::sym(timeVar))),
+          !!rlang::sym(timeVar) < 0 ~ -1 * log(abs(!!rlang::sym(timeVar))),
+          TRUE ~ !!rlang::sym(timeVar)
+        )
+      )
+      footnote <- paste(
+        "Note:", timeLab, 
+        "values are plotted on a log scale; however", timeLab, 
+        "values in tooltip reflect actual data."
+      )
+    }
+  }
   
   # create tool tip column in data
   if (!is.null(paramValueVarUnits)) {
@@ -333,11 +389,21 @@ plotlyLinePlot <- function(data,
   plot_tbl <- data %>%
     dplyr::group_by(paramFacetVar) %>%
     plotly::do(
-      p = plotly::plot_ly(
-        .,
-        x = ~.data[[timeVar]],
-        y = ~yVar
-      ) %>%
+      p = {
+        if (!is.null(log_x_axis)) {
+          plotly::plot_ly(
+            .,
+            x = ~timeVarLog,
+            y = ~yVar
+          )
+        } else {
+          plotly::plot_ly(
+            .,
+            x = ~.data[[timeVar]],
+            y = ~yVar
+          )
+        }
+      } %>%
         {
           if (!is.null(shapeVar)) {
             plotly::add_trace(
@@ -494,6 +560,20 @@ plotlyLinePlot <- function(data,
       y = 0.75,
       xanchor = "right",
       yanchor = "bottom",
+      showarrow = FALSE,
+      align = "left"
+    )
+  }
+  
+  # add footnote about x-axis log scale
+  if (!is.null(log_x_axis)) {
+    plots <- plotly::add_annotations(
+      plots,
+      text = footnote,
+      xref = "paper",
+      yref = "paper",
+      x = 0,
+      y = log_footnote_y_shift,
       showarrow = FALSE,
       align = "left"
     )

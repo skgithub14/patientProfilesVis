@@ -486,6 +486,84 @@ test_that("plotlyLinePlot() generates a line plot", {
   )
 })
 
+test_that("plotlyLinePlot() can log the x-axis and include footnote", {
+  
+  ## data prep
+  data("dataSDTMCDISCP01", package = "clinUtils")
+  dataSDTM <- dataSDTMCDISCP01
+  dataLB <- dataSDTM$LB
+  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  subjectLB <- "01-704-1445"
+  dataLB <- dplyr::filter(dataLB, USUBJID == subjectLB)
+  data <- dataLB
+  colorVar <- "LBCAT"
+  colorPalette <- getColorPalettePatientProfile(x = data[, colorVar])
+  shapeVar = "LBNRIND"
+  shapePalette <- getShapePalettePatientProfile(x = data[, shapeVar])
+  paramValueVar <- "LBSTRESN"
+  data[, "yVar"] <- data[, paramValueVar]
+  paramNameVar <- c("LBTEST", "LBSTRESU")
+  paramVarSep <- " - "
+  data[, "paramFacetVar"] <- interactionWithMissing(data = data, 
+                                                    vars = paramNameVar, 
+                                                    varSep = paramVarSep)
+  
+  # exaggerate negative values
+  data <- dplyr::mutate(
+    data,
+    LBDY = dplyr::if_else(LBDY < 0, LBDY - 100, LBDY)
+  )
+  
+  # log positive x values
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = colorVar,
+    colorPalette = colorPalette,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    log_x_axis = "pos"
+  )
+  
+  # log negative x values
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = colorVar,
+    colorPalette = colorPalette,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    log_x_axis = "neg"
+  )
+  
+  # log all x values
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = colorVar,
+    colorPalette = colorPalette,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    log_x_axis = "both"
+  )
+  
+})
+
 
 #### subjectProfileLinePlot() ####
 
