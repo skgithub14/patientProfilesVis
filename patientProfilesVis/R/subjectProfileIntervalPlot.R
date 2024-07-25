@@ -16,7 +16,6 @@
 #' @param caption (optional) String with caption (NULL for no caption). 
 #' By default the caption contains information on the imputation strategy 
 #' for missing time. 
-#' @param plotly Boolean. If TRUE, generate a plotly output, if not, ggplot.
 #' @param plotly_hover_text Named vector. If provided, plotly hover will include
 #' this information, in form of `<b>Name</b>: value`
 #' @inheritParams patientProfilesVis-common-args
@@ -187,107 +186,7 @@ subjectProfileIntervalPlot <- function(
 		  
 		  if (plotly == TRUE) {
 		    
-		    dataSubject[[paramVar]] <- forcats::fct_rev(factor(dataSubject[[paramVar]]))
 		    
-		    p <- plotly::plot_ly(
-		      color = dataSubject[[colorVar]]
-		    )
-		    
-		    # We're going to plot each colorVar sequentially, and within it, plot
-		    # start/end points + segments, that way we can control all three with "MILD" click
-		    
-		    for (colour in levels(dataSubject[[colorVar]])) {
-		      dat <- dataSubject[!is.na(dataSubject[[colorVar]]) & dataSubject[[colorVar]] == colour,]
-		      
-		      # Plot the start points
-		      for (category in unique(dat[[timeStartShapeVar]])) {
-		        
-		        if (!is.na(category)) {
-		          
-		          start_dat <- dat[!is.na(dat[[timeStartShapeVar]]) & dat[[timeStartShapeVar]] == category,]
-		          
-		          hover_texts <- apply(start_dat, 1, generate_plotly_hover_text, 
-		                               timeStartVar, paramVar, colorVar, 
-		                               timeStartShapeVar, plotly_hover_text)
-		          
-		          start_dat$hover_texts <- unname(hover_texts)
-		          
-		          p <- p |>
-		            plotly::add_trace(
-		              x = start_dat[[timeStartVar]],
-		              y = start_dat[[paramVar]],
-		              color = sapply(start_dat[[colorVar]], function(x) color_scale[[x]]),
-		              type = 'scatter',
-		              mode = 'markers',
-		              # If not complete, it's missing start
-		              marker = list(symbol = shape_scale[[category]],
-		                            size = 10),
-		              showlegend = TRUE,
-		              legendgroup = colour, # This is necessary to control multiple traces with one legend.
-		              text = start_dat[["hover_texts"]],
-		              hoverinfo = "text"
-		            )
-		        }
-		      }
-		      
-		      # Plot the end points
-		      for (category in unique(dat[[timeEndShapeVar]])) {
-		        if (!is.na(category)) {
-		          
-		          end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
-		          
-		          hover_texts <- apply(end_dat, 1, generate_plotly_hover_text, 
-		                               timeEndVar, paramVar, colorVar, 
-		                               timeEndShapeVar, plotly_hover_text)
-		          
-		          end_dat$hover_texts <- unname(hover_texts)
-		          
-		          p <- p |>
-		            plotly::add_trace(
-		              x = end_dat[[timeEndVar]],
-		              y = end_dat[[paramVar]],
-		              color = sapply(end_dat[[colorVar]], function(x) color_scale[[x]]),
-		              type = 'scatter',
-		              mode = 'markers',
-		              # If not complete, it's missing end
-		              marker = list(symbol = shape_scale[[category]],
-		                            size = 10),
-		              showlegend = FALSE,
-		              legendgroup = colour,
-		              text = end_dat[["hover_texts"]],
-		              hoverinfo = "text"
-		            )
-		        }
-		      }
-		      
-		      # Plot the connecting lines
-		      segment_df <- dat[!is.na(dat$missingStartPlot) & !is.na(dat$missingEndPlot), ]
-		      
-		      if (nrow(segment_df) > 0) {
-		        p <- p |>
-		          plotly::add_segments(
-		            x = segment_df[[timeStartVar]],
-		            xend = segment_df[[timeEndVar]],
-		            y = segment_df[[paramVar]],
-		            yend = segment_df[[paramVar]],
-		            color = sapply(segment_df[[colorVar]], function(x) color_scale[[x]]),
-		            line = list(width = 2),
-		            showlegend = FALSE,
-		            legendgroup = colour
-		          )
-		      }
-		    }
-		    
-		    p <- p |>
-		      plotly::layout(
-		        title = title,
-		        xaxis = list(
-		          zeroline = FALSE,
-		          title = xLab
-		        )
-		      )
-		    
-		    p
 		  } else {
 		    aesArgs <- c(
 		      list(
@@ -336,6 +235,12 @@ subjectProfileIntervalPlot <- function(
 		      }
 		      gg + do.call(geom_point, argsGeomPoint)
 		    }
+		    
+		    
+		    
+		    browser()
+		    
+		    
 		    
 		    gg <- geomPointCustom(gg, xVar = timeStartVar, shapeVar = timeStartShapeVar)
 		    gg <- geomPointCustom(gg, xVar = timeEndVar, shapeVar = timeEndShapeVar)

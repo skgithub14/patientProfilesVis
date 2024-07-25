@@ -77,3 +77,107 @@ getColorPalettePatientProfile <- function(..., includeNA = TRUE){
 	return(palette)
 	
 }
+
+
+#' Convert [ggplot2] shape to [plotly] symbol
+#'
+#' @param shapes a numeric or character vector representing [ggplot2] shapes
+#'
+#' @returns a character vector, the corresponding [plotly] shape name
+#'
+convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
+  
+  convert_shape <- function(shape) {
+    
+    # convert ggplot shape from character to numeric
+    if (!grepl("^[[:digit:]]+L*$", shape)) {
+      shape <- ggplot2::translate_shape_string(shape)
+    }
+    
+    shape <- as.character(shape)
+    switch(
+      shape,
+      "0" = "square-open",
+      "1" = "circle-open",
+      "2" = "triangle-up-open",
+      "3" = "cross-thin",
+      "4" = "x-thin",
+      "5" = "diamond-open",
+      "6" = "triangle-down-open",
+      "7" = "square-x-open",
+      "8" = "asterisk-open",
+      "9" = "diamond-cross-open",
+      "10" = "circle-cross-open",
+      "11" = "hourglass-open",
+      "12" = "square-cross-open",
+      "13" = "circle-x-open",
+      # "14" # no equivalent
+      "15" = "square-dot", 
+      "16" = "circle-dot", 
+      "17" = "triangle-up",
+      "18" = "diamond-dot",
+      "19" = "circle-dot",
+      "20" = "circle-dot",
+      "21" = "circle-dot",
+      "22" = "square-dot",
+      "23" = "diamond-dot",
+      "24" = "triangle-up",
+      "25" = "triangle-down",
+      stop(paste("no plotly shape corresponds to ggplot shape", shape))
+    )
+  }
+  
+  purrr::map_chr(shapes, \(shape) convert_shape(shape))
+}
+
+
+#' Convert [ggplot2] shape to unicode character
+#'
+#' @param shapes a numeric or character vector representing [ggplot2] shapes
+#'
+#' @returns a character vector of unicode symbols
+#'
+convert_ggplot_shapes_to_unicode <- function(shapes) {
+  
+  convert_shape <- function(shape) {
+    
+    # convert ggplot shape from character to numeric
+    if (!grepl("^[[:digit:]]+L*$", shape)) {
+      shape <- ggplot2::translate_shape_string(shape)
+    }
+    
+    shape <- as.character(shape)
+    switch(
+      shape,
+      "0" = "\u25A1", # "square-open",
+      "1" = "\u2B58", # "circle-open",
+      "2" = "\u25B3", # "triangle-up-open",
+      "3" = "\U1F7A2", # "cross-thin",
+      "4" = "\u2A2F", # "x-thin",
+      "5" = "\u25C7", # "diamond-open",
+      "6" = "\u25BD", # "triangle-down-open",
+      "7" = "\u22A0", # "square-x-open",
+      "8" = "\u002A", # "asterisk-open", # no equivalent
+      # "9" = "", # "diamond-cross-open",
+      "10" = "\u2295", # "circle-cross-open",
+      # "11" = "\u29D6", # "hourglass-open", # no equivalent
+      "12" = "\u229E", # "square-cross-open",
+      "13" = "\u2297", # "circle-x-open",
+      # "14" # no equivalent
+      "15" = "\u25A0", # "square-dot", 
+      "16" = "\u25CF", # "circle-dot", 
+      "17" = "\u25B2", # "triangle-up",
+      "18" = "\u25C6", # "diamond-dot",
+      "19" = "\u25CF", # "circle-dot",
+      "20" = "\u25CF", # "circle-dot",
+      "21" = "\u25CF", # "circle-dot",
+      "22" = "\u25A0", # "square-dot",
+      "23" = "\u25C6", # "diamond-dot",
+      "24" = "\u25B2", # "triangle-up",
+      "25" = "\u25BC", # "triangle-down",
+      stop(paste("no unicode equivalent to ggplot shape", shape))
+    )
+  }
+  
+  purrr::map_chr(shapes, \(shape) convert_shape(shape))
+}

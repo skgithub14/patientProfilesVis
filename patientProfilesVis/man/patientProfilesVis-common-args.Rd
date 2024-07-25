@@ -90,7 +90,8 @@ argument is ignored for plotly outputs; if relevant see
 `plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
-(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
+(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+Only applicable to [ggplot2] outputs.}
 
 \item{listPlots}{Named list of subject profiles.
 Each sublist contains subject profiles as returned
@@ -111,6 +112,9 @@ e.g. output of the \code{\link{subjectProfileReportFormat}} function}
 
 \item{paramVarSep}{string with character(s) used to concatenate multiple 
 \code{paramVar}, ' - ' by default.}
+
+\item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
+[ggplot2] output; default is `FALSE`}
 }
 \value{
 No return value, used for the documentation of 

@@ -34,8 +34,6 @@
 #'   recommend setting this value to `7` or higher.
 #' @param title String with title, label of the parameter value variable by
 #'   default.
-#' @param plotly a logical value, `TRUE` for [plotly] output, `FALSE` for a
-#'   [ggplot2] output; default is `FALSE`
 #' @param plotly_args a list with the following named values:
 #'   \itemize{
 #'     \item{`paramValueVarUnits`}{"an optional string, the column in `data`
@@ -46,9 +44,6 @@
 #'       tooltip. The names are the labels in the tooltip and the values are the
 #'       columns in `data` where the values will be pulled from; default is
 #'       `NULL`"} 
-#'     \item{`facetVarMaxLength`}{"a numeric value, the maximum number
-#'       of characters allowed in an entry in the `data$paramFacetVar` column
-#'       before line breaks will be added at every space"} 
 #'     \item{`margin`}{"a named list of numeric values specifying the plot 
 #'       margins, names should be `l` (left), `r` (right), `b` (bottom), 
 #'       `t` (top), and `pad` (padding); default is 
@@ -123,7 +118,6 @@ subjectProfileLinePlot <- function(
 	plotly_args = list(
 	  paramValueVarUnits = NULL,
 	  add_vars = NULL,
-	  facetVarMaxLength = 30,
 	  margin = list(
 	    l = 250,
 	    r = 250,
@@ -243,9 +237,6 @@ subjectProfileLinePlot <- function(
 	  if (plotly) {
 	    
 	    # reset defaults if they were dropped from `plotly_args`
-	    if (is.null(plotly_args$facetVarMaxLength)) {
-	      plotly_args$facetVarMaxLength <- 30
-	    }
 	    if (is.null(plotly_args$margin)) {
 	      plotly_args$margin <- list(l = 250, r = 250, b = 75, t = 50, pad = 4)
 	    }
@@ -281,7 +272,6 @@ subjectProfileLinePlot <- function(
         title = title,
         xLab = xLab,
         add_vars = plotly_args$add_vars,
-        facetVarMaxLength = plotly_args$facetVarMaxLength,
         margin = plotly_args$margin,
         yaxis_title_shift = plotly_args$yaxis_title_shift,
 	      legend_x_shift = plotly_args$legend_x_shift,

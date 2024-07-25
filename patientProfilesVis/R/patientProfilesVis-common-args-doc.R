@@ -67,7 +67,8 @@
 #' argument is ignored for plotly outputs; if relevant see 
 #' `plotly_args$log_x_axis` argument instead.
 #' @param timeExpand Vector of range expansion constants for the time axis
-#' (see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).
+#' (see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+#' Only applicable to [ggplot2] outputs.
 #' @param listPlots Named list of subject profiles.
 #' Each sublist contains subject profiles as returned
 #' by the \code{subjectProfile[X]Plot} function, 
@@ -83,6 +84,8 @@
 #' @param paramVarSep string with character(s) used to concatenate multiple 
 #' \code{paramVar}, ' - ' by default.
 #' @name patientProfilesVis-common-args
+#' @param plotly a logical value, `TRUE` for [plotly] output, `FALSE` for a
+#'   [ggplot2] output; default is `FALSE`
 #' @return No return value, used for the documentation of 
 #' the functions of the package.
 NULL

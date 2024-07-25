@@ -152,7 +152,8 @@ argument is ignored for plotly outputs; if relevant see
 `plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
-(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
+(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+Only applicable to [ggplot2] outputs.}
 
 \item{timeAlign}{Logical, if TRUE (by default)
 the different plots are horizontally aligned.
@@ -229,7 +230,8 @@ to be re-sized in order that the plot fits.
 \cr
 If FALSE, the entire plot is included in one single page.}
 
-\item{plotly}{Boolean. If TRUE, generate a plotly output, if not, ggplot.}
+\item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
+[ggplot2] output; default is `FALSE`}
 
 \item{plotly_hover_text}{Named vector. If provided, plotly hover will include
 this information, in form of `<b>Name</b>: value`}
