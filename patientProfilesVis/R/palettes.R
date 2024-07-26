@@ -79,13 +79,13 @@ getColorPalettePatientProfile <- function(..., includeNA = TRUE){
 }
 
 
-#' Convert [ggplot2] shape to [plotly] symbol
+#' Convert [ggplot2] shapes and some unicode characters to [plotly] symbols
 #'
 #' @param shapes a numeric or character vector representing [ggplot2] shapes
 #'
 #' @returns a character vector, the corresponding [plotly] shape name
 #'
-convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
+convert_shapes_to_plotly_symbols <- function(shapes) {
   
   convert_shape <- function(shape) {
     
@@ -123,6 +123,12 @@ convert_ggplot_shapes_to_plotly_symbols <- function(shapes) {
       "23" = "diamond-dot",
       "24" = "triangle-up",
       "25" = "triangle-down",
+      
+      # add unicode characters used in interval plot defaults
+      "\u25A0" = "square",
+      "\u25C2" = "triangle-left",
+      "\u25B8" = "triangle-right",
+      
       stop(paste("no plotly shape corresponds to ggplot shape", shape))
     )
   }

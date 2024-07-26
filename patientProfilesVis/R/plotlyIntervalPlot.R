@@ -1,113 +1,194 @@
 plotlyIntervalPlot <- function(data,
                                timeStartVar,
                                timeEndVar,
+                               colorVar,
+                               colorLab,
+                               colorPalette,
                                alpha,
-                               shapeSize) {
+                               timeStartShapeVar,
+                               timeEndShapeVar,
+                               shapeLab,
+                               shapePalette,
+                               shapeSize,
+                               title,
+                               xLab,
+                               yLab,
+                               caption,
+                               margin = list(
+                                 l = 50,
+                                 r = 50,
+                                 b = 100,
+                                 t = 50,
+                                 pad = 4
+                               ),
+                               caption_y_shift = -0.12) {
   
-  p <- plotly::plot_ly(
-    data = data, 
-    y = ~yVar
-  )
+  # helper function to for legend labels
+  get_timeStatusLegendLabel <- function(timeStatusCat) {
+    switch(timeStatusCat,
+           "Complete" = "(complete start/end)",
+           "Missing start" = "(missing start)",
+           "Missing end" = "(missing end)")
+  }
   
-  # add segments that have no missing start/end dates
-  not_missing <- dplyr::filter(
-    data,
-    !is.na(!!rlang::sym(timeStartVar)) & !is.na(!!rlang::sym(timeEndVar))
-  )
-  p <- p %>%
-    plotly::add_trace(
-      data = not_missing,
-      type = "scatter",
-      mode = "lines",
-      # line = list(
-      #   color = ,
-      #   opacity = alpha
-      # ),
-      # showlegend = FALSE
-    ) %>%
+  # convert shape unicode and ggplot symbols to plotly symbol names
+  shapePalettePlotly <- convert_shapes_to_plotly_symbols(shapes = shapePalette)
+  
+  p <- plotly::plot_ly(data = data)
+
+  # We're going to plot each colorVar sequentially, and within it, plot
+  # start/end points + segments, that way we can control all three with "MILD" click
+  
+  # plot each color so colors can be filtered using the legend
+  for (color_num in seq_along(colorPalette)) {
+    color <- colorPalette[[color_num]]
+    color_val <- names(colorPalette)[color_num]
     
-    # start point
-    plotly::add_trace(
-      data = not_missing,
-      type = "scatter",
-      mode = "markers",
-      x = ~.data[[timeStartVar]]
-      # ,
-      # symbol = ~shapeVar,
-      # symbols = shapePalettePlotly,
-      # marker = list(
-      #   color = if (!is.null(colorVar)) {
-      #     colorPalette[
-      #       which(names(colorPalette) == unique(.data[[colorVar]]))
-      #     ]
-      #   } else {
-      #     colorPalette # variable is never NULL in subjectProfileLinePlot
-      #   },
-      #   size = shapeSize,
-      #   opacity = alpha
-      # )
-      # ,
-      # showlegend = FALSE,
-      # hovertemplate = .data$hovertemplate
-    ) %>%
+    # subset data for this color
+    if (length(colorPalette) == 1) {
+      color_dat <- data
+    } else {
+      color_dat <- dplyr::filter(data, !!rlang::sym(colorVar) == color_val)
+    }
     
-    # end point
-    plotly::add_trace(
-      data = not_missing,
-      type = "scatter",
-      mode = "markers",
-      x = ~.data[[timeEndVar]]
-      # ,
-      # symbol = ~shapeVar,
-      # symbols = shapePalettePlotly,
-      # marker = list(
-      #   color = if (!is.null(colorVar)) {
-      #     colorPalette[
-      #       which(names(colorPalette) == unique(.data[[colorVar]]))
-      #     ]
-      #   } else {
-      #     colorPalette # variable is never NULL in subjectProfileLinePlot
-      #   },
-      #   size = shapeSize,
-      #   opacity = alpha
-      # )
-      # ,
-      # showlegend = FALSE,
-      # hovertemplate = .data$hovertemplate
+    # plot the start points
+    for (timeStartCat in unique(color_dat[[timeEndShapeVar]])) {
+      if (!is.na(timeStartCat)) {
+        
+        start_dat <- dplyr::filter(
+          color_dat,
+          !is.na(!!rlang::sym(timeEndShapeVar)) &
+          !!rlang::sym(timeEndShapeVar) == timeStartCat
+        )
+        
+        timeStartCatLegend <- get_timeStatusLegendLabel(timeStartCat)
+        
+        p <- p |>
+          plotly::add_trace(
+            x = start_dat[[timeStartVar]],
+            y = start_dat[[paramVar]],
+            color = color,
+            type = 'scatter',
+            mode = 'markers',
+            marker = list(
+              symbol = shapePalettePlotly[[timeStartCat]],
+              size = shapeSize,
+              opacity = alpha
+            ),
+            name = paste(color_val, "- Start Point", timeStartCatLegend),
+            showlegend = TRUE,
+            legendgroup = paste(color_val, "- Start") # This is necessary to control multiple traces with one legend.
+            # text = start_dat[["hover_texts"]],
+            # hoverinfo = "text"
+          )
+      }
+    }
+    
+    # plot the end points
+    for (timeEndCat in unique(color_dat[[timeStartShapeVar]])) {
+      if (!is.na(timeEndCat)) {
+        
+        end_dat <- dplyr::filter(
+          color_dat,
+          !is.na(!!rlang::sym(timeStartShapeVar)) &
+            !!rlang::sym(timeStartShapeVar) == timeEndCat
+        )
+        
+        timeEndCatLegend <- get_timeStatusLegendLabel(timeEndCat)
+        
+        p <- p |>
+          plotly::add_trace(
+            x = end_dat[[timeEndVar]],
+            y = end_dat[[paramVar]],
+            color = color,
+            type = 'scatter',
+            mode = 'markers',
+            marker = list(
+              symbol = shapePalettePlotly[[timeEndCat]],
+              size = shapeSize,
+              opacity = alpha
+            ),
+            name = paste(color_val, "- End Point", timeEndCatLegend),
+            showlegend = TRUE,
+            legendgroup = paste(color_val, "- End") # This is necessary to control multiple traces with one legend
+          )
+      }
+    }
+    
+    # plot the connecting lines
+    segment_df <- dplyr::filter(
+      color_dat,
+      !!rlang::sym(timeStartShapeVar) == "Complete" &
+      !!rlang::sym(timeEndShapeVar) == "Complete"
+    )
+    
+    if (nrow(segment_df) > 0) {
+      p <- p |>
+        plotly::add_segments(
+          x = segment_df[[timeStartVar]],
+          xend = segment_df[[timeEndVar]],
+          y = segment_df[[paramVar]],
+          yend = segment_df[[paramVar]],
+          color = color,
+          opacity = alpha,
+          line = list(width = 2),
+          showlegend = FALSE,
+          legendgroup = paste(color_val, "- End")
+        )
+    }
+    
+    
+  } # end of color plotting loop
+  
+  p <- p |>
+    plotly::layout(
+      title = title,
+      xaxis = list(
+        title = xLab
+      ),
+      xaxis = list(
+        title = yLab
+      ),
+      legend = list(
+        title = list(
+          text = paste0("<b>", colorLab, " - ", shapeLab, "</b>")
+        )
+      ),
+      margin = margin
     )
   
-  missing <- dplyr::filter(
-    data,
-    is.na(!!rlang::sym(timeStartVar)) | is.na(!!rlang::sym(timeEndVar))
-  )
+  # add caption
+  if (!is.null(caption)) {
+    p <- plotly::add_annotations(
+      p,
+      text = caption,
+      xref = "paper",
+      yref = "paper",
+      x = 0,
+      y = caption_y_shift,
+      showarrow = FALSE,
+      align = "left"
+    )
+  }
   
   return(p)
-  
-  # dataSubject[[paramVar]] <- forcats::fct_rev(factor(dataSubject[[paramVar]]))
-  # 
-  # p <- plotly::plot_ly(
-  #   color = dataSubject[[colorVar]]
-  # )
-  # 
-  # # We're going to plot each colorVar sequentially, and within it, plot
-  # # start/end points + segments, that way we can control all three with "MILD" click
-  # 
+
   # for (colour in levels(dataSubject[[colorVar]])) {
   #   dat <- dataSubject[!is.na(dataSubject[[colorVar]]) & dataSubject[[colorVar]] == colour,]
-  #   
+  # 
   #   # Plot the start points
   #   for (category in unique(dat[[timeStartShapeVar]])) {
-  #     
+  # 
   #     if (!is.na(category)) {
-  #       
+  # 
   #       start_dat <- dat[!is.na(dat[[timeStartShapeVar]]) & dat[[timeStartShapeVar]] == category,]
-  #       
-  #       hover_texts <- apply(start_dat, 1, generate_plotly_hover_text, 
-  #                            timeStartVar, paramVar, colorVar, 
+  # 
+  #       hover_texts <- apply(start_dat, 1, generate_plotly_hover_text,
+  #                            timeStartVar, paramVar, colorVar,
   #                            timeStartShapeVar, plotly_hover_text)
-  #       
+  # 
   #       start_dat$hover_texts <- unname(hover_texts)
-  #       
+  # 
   #       p <- p |>
   #         plotly::add_trace(
   #           x = start_dat[[timeStartVar]],
@@ -125,19 +206,19 @@ plotlyIntervalPlot <- function(data,
   #         )
   #     }
   #   }
-  #   
+  # 
   #   # Plot the end points
   #   for (category in unique(dat[[timeEndShapeVar]])) {
   #     if (!is.na(category)) {
-  #       
+  # 
   #       end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
-  #       
-  #       hover_texts <- apply(end_dat, 1, generate_plotly_hover_text, 
-  #                            timeEndVar, paramVar, colorVar, 
+  # 
+  #       hover_texts <- apply(end_dat, 1, generate_plotly_hover_text,
+  #                            timeEndVar, paramVar, colorVar,
   #                            timeEndShapeVar, plotly_hover_text)
-  #       
+  # 
   #       end_dat$hover_texts <- unname(hover_texts)
-  #       
+  # 
   #       p <- p |>
   #         plotly::add_trace(
   #           x = end_dat[[timeEndVar]],
@@ -155,10 +236,10 @@ plotlyIntervalPlot <- function(data,
   #         )
   #     }
   #   }
-  #   
+  # 
   #   # Plot the connecting lines
   #   segment_df <- dat[!is.na(dat$missingStartPlot) & !is.na(dat$missingEndPlot), ]
-  #   
+  # 
   #   if (nrow(segment_df) > 0) {
   #     p <- p |>
   #       plotly::add_segments(
@@ -173,18 +254,6 @@ plotlyIntervalPlot <- function(data,
   #       )
   #   }
   # }
-  # 
-  # p <- p |>
-  #   plotly::layout(
-  #     title = title,
-  #     xaxis = list(
-  #       zeroline = FALSE,
-  #       title = xLab
-  #     )
-  #   )
-  # 
-  # p
-  
   
 }
 

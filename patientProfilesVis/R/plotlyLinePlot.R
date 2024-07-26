@@ -155,11 +155,15 @@ plotlyLinePlot <- function(data,
                            "0.2)")
   }
   
-  # create a shape symbol column in the data
+  # convert symbols
   if (!is.null(shapeVar)) {
-    shapePalettePlotly <- convert_ggplot_shapes_to_plotly_symbols(
+    
+    # shapes used on plot
+    shapePalettePlotly <- convert_shapes_to_plotly_symbols(
       shapes = shapePalette
     )
+    
+    # shapes used on legend
     shapePaletteUnicode <- convert_ggplot_shapes_to_unicode(
       shapes = shapePalette
     )
