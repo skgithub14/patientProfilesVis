@@ -1,4 +1,6 @@
 plotlyIntervalPlot <- function(data,
+                               paramVar,
+                               paramLab,
                                timeStartVar,
                                timeStartLab,
                                timeEndVar,
@@ -24,7 +26,8 @@ plotlyIntervalPlot <- function(data,
                                  pad = 4
                                ),
                                caption_y_shift = -0.12,
-                               log_x_axis = NULL) {
+                               log_x_axis = NULL,
+                               add_vars = NULL) {
   
   # log the x-axis
   if (!is.null(log_x_axis)) {
@@ -91,6 +94,30 @@ plotlyIntervalPlot <- function(data,
   # convert shape unicode and ggplot symbols to plotly symbol names
   shapePalettePlotly <- convert_shapes_to_plotly_symbols(shapes = shapePalette)
   
+  # treat tooltip hovertemplate column in the data
+  if (!is.null(colorVar)) {
+    colorVarDat <- data[[colorVar]]
+  } else {
+    colorVarDat <- NULL
+  }
+  if (!is.null(add_vars)) {
+    add_vars <- purrr::map(add_vars, \(x) data[[x]])
+  }
+  data <- dplyr::mutate(
+    data,
+    hovertemplate = intervalPlotHoverTemplate(
+      paramVal = !!rlang::sym(paramVar),
+      paramLab = paramLab,
+      timeStartVal = !!rlang::sym(timeStartVar),
+      timeStartLab = timeStartLab,
+      timeEndVal = !!rlang::sym(timeEndVar),
+      timeEndLab = timeEndLab,
+      colorLab = colorLab, 
+      colorVal = colorVarDat, 
+      add_vars = add_vars
+    )
+  )
+  
   p <- plotly::plot_ly(data = data)
   
   # plot each color so colors can be filtered using the legend
@@ -133,9 +160,8 @@ plotlyIntervalPlot <- function(data,
           ),
           name = paste(color_val, "- Missing end"),
           showlegend = TRUE,
-          legendgroup = color_val
-          # text = start_dat[["hover_texts"]],
-          # hoverinfo = "text"
+          legendgroup = color_val,
+          hovertemplate = start_dat$hovertemplate
         )
     }
     
@@ -152,9 +178,9 @@ plotlyIntervalPlot <- function(data,
       p <- p |>
         plotly::add_trace(
           x = if (is.null(log_x_axis)) {
-            start_dat[[timeEndVar]]
+            end_dat[[timeEndVar]]
           } else {
-            start_dat[[paste0(timeEndVar, "Log")]]
+            end_dat[[paste0(timeEndVar, "Log")]]
           },
           y = end_dat[[paramVar]],
           color = color,
@@ -167,33 +193,34 @@ plotlyIntervalPlot <- function(data,
           ),
           name = paste(color_val, "- Missing start"),
           showlegend = TRUE,
-          legendgroup = color_val
+          legendgroup = color_val,
+          hovertemplate = end_dat$hovertemplate
         )
     }
     
     # plot AEs that have both start and end dates
-    segment_df <- dplyr::filter(
+    segment_dat <- dplyr::filter(
       color_dat,
       !!rlang::sym(timeStartShapeVar) == "Complete" &
       !!rlang::sym(timeEndShapeVar) == "Complete"
     )
     
-    if (nrow(segment_df) > 0) {
+    if (nrow(segment_dat) > 0) {
       p <- p |>
         plotly::add_segments(
           mode = 'lines+markers',
           x = if (is.null(log_x_axis)) {
-            segment_df[[timeStartVar]]
+            segment_dat[[timeStartVar]]
           } else {
-            segment_df[[paste0(timeStartVar, "Log")]]
+            segment_dat[[paste0(timeStartVar, "Log")]]
           },
           xend = if (is.null(log_x_axis)) {
-            segment_df[[timeEndVar]]
+            segment_dat[[timeEndVar]]
           } else {
-            segment_df[[paste0(timeEndVar, "Log")]]
+            segment_dat[[paste0(timeEndVar, "Log")]]
           },
-          y = segment_df[[paramVar]],
-          yend = segment_df[[paramVar]],
+          y = segment_dat[[paramVar]],
+          yend = segment_dat[[paramVar]],
           marker = list(
             symbol = shapePalettePlotly[["Complete"]],
             size = shapeSize,
@@ -204,7 +231,8 @@ plotlyIntervalPlot <- function(data,
           line = list(width = 2),
           name = paste(color_val, "- Complete"),
           showlegend = TRUE,
-          legendgroup = color_val
+          legendgroup = color_val,
+          hovertemplate = segment_dat$hovertemplate
         )
     }
   } # end of color plotting loop
@@ -224,6 +252,15 @@ plotlyIntervalPlot <- function(data,
         )
       ),
       margin = margin
+    ) %>%
+    plotly::config(
+      displaylogo = FALSE,
+      modeBarButtonsToRemove = c(
+        'lasso2d',
+        'select2d',
+        'hoverClosestCartesian',
+        'hoverCompareCartesian'
+      )
     )
   
   # add caption
@@ -245,66 +282,56 @@ plotlyIntervalPlot <- function(data,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' Generate text to include in plotly hover
-#' @param dat A row of dataframe
-#' @param timeVar A string, that determines time mapping
-#' @param paramVar A string, that determines param mapping
-#' @param colorVar A string, that determines color mapping
-#' @param timeShapeVar A string that determines shape mapping
-#' @param plotly_hover_text A named vector. If not null, 
-#' `generate_extra_plotly_hover_text` will be called to create extra info.
-generate_plotly_hover_text <- function(dat, timeVar, paramVar, colorVar, 
-                                       timeShapeVar, plotly_hover_text = NULL) {
-  base_text <- paste0(
-    '<b>', timeVar, '</b>: ', dat[[timeVar]], '<br>',
-    '<b>', paramVar, '</b>: ', dat[[paramVar]], '<br>',
-    '<b>', colorVar, '</b>: ', dat[[colorVar]], '<br>',
-    '<b>Status</b>: ', dat[[timeShapeVar]], '<br>'
+#' Create [plotly] tool tip hover template for an interval plot
+#'
+#' @param title a string, the tool tip title
+#' @inheritParams patientProfilesVis-common-args
+#' @inheritParams subjectProfileLinePlot
+#' @inheritParams plotlyLinePlot
+#' @param lln,uln optional numeric values, the lower and upper limit normal
+#'   values, respectively
+#'
+#' @returns a string with html formatting
+#' 
+intervalPlotHoverTemplate <- function(paramVal,
+                                      paramLab,
+                                      timeStartVal,
+                                      timeStartLab,
+                                      timeEndVal,
+                                      timeEndLab,
+                                      colorLab = NULL, 
+                                      colorVal = NULL, 
+                                      add_vars = NULL) {
+  
+  # title (usually the parameter name) and y value
+  ht <- paste0(
+    '<b>', paramLab, ':</b><br>',
+    '<b>', paramVal, '</b><br><br>',
+    '<i>', timeStartLab, '</i>: ', timeStartVal, '<br>',
+    '<i>', timeEndLab, '</i>: ', timeEndVal, '<br>'
   )
   
-  extra_text <- if (!is.null(plotly_hover_text)) {
-    generate_extra_plotly_hover_text(plotly_hover_text, dat)
-  } else {
-    ""
+  # optional color variable
+  if (!is.null(colorLab) & !is.null(colorVal)) {
+    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
   }
-  return(paste0(base_text, extra_text, "<br>"))
-}
-
-#' Generate extra text to include in plotly hover
-#' @param plotly_hover_text Named vector. Plotly hover will include
-#' this information, in form of `<b>Name</b>: value`
-#' @param dat Data frame, where column `value` will be pulled to make the text
-generate_extra_plotly_hover_text <- function(plotly_hover_text, dat) {
-  text_list <- mapply(function(name, value) {
-    paste0("<b>", name, "</b>: ", dat[[value]])
-  }, names(plotly_hover_text), plotly_hover_text)
   
-  collapsed <- paste(text_list, collapse = "<br>")
-  res <- paste0(collapsed, "<br>")
+  ## additional variables
+  if (!is.null(add_vars)) {
+    add_vars1 <- purrr::imap(add_vars, \(value, label) {
+      purrr::map_chr(value, \(val) {
+        if (!is.na(val) & val != "") {
+          paste0('<i>', label, '</i>: ', val, '<br>')
+        } else {
+          ""
+        }
+      })
+    }) %>%
+      purrr::discard(is.null) %>%
+      purrr::reduce(paste0)
+    ht <- paste0(ht, add_vars1)
+  }
   
-  return(res)
+  ht <- paste0(ht, '<extra></extra>')
+  return(ht)
 }

@@ -131,14 +131,14 @@ plotlyLinePlot <- function(data,
     data,
     hovertemplate = linePlotHoverTemplate(
       title = paramFacetVar,
-      paramValueVar = !!rlang::sym(paramValueVar),
-      paramValueVarUnits = paramValueVarUnitsDat,
+      paramValueVal = !!rlang::sym(paramValueVar),
+      paramValueValUnits = paramValueVarUnitsDat,
       timeLab = timeLab,
-      timeVar = !!rlang::sym(timeVar),
+      timeVal = !!rlang::sym(timeVar),
       colorLab = colorLab,
-      colorVar = colorVarDat,
+      colorVal = colorVarDat,
       shapeLab = shapeLab,
-      shapeVar = shapeVarDat,
+      shapeVal = shapeVarDat,
       lln = llnDat,
       uln = ulnDat,
       add_vars = add_vars
@@ -367,13 +367,14 @@ plotlyLinePlot <- function(data,
 }
 
 
-#' Create plotly tool tip hover template for a line plot
-#'
-#' @details 
-#' This function is designed to called within a [plotly::plot_ly()] or
-#' [plotly::add_trace()] call for the `hovertemplate` argument.
+#' Create [plotly] tool tip hover template for a line plot
 #'
 #' @param title a string, the tool tip title
+#' @param paramValueVal the value of `paramValueVar` for the tooltip
+#' @param paramValueValUnits the value of `paramValueVarUnits` for the tooltip
+#' @param timeVal the value of `timeVar` for the tooltip
+#' @param colorVal optional, the value of `colorVar` for the tooltip
+#' @param shapeVal optional, the value of `shapeVar` for the tooltip
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
 #' @inheritParams plotlyLinePlot
@@ -383,14 +384,14 @@ plotlyLinePlot <- function(data,
 #' @returns a string with html formatting
 #' 
 linePlotHoverTemplate <- function(title, 
-                                  paramValueVar,
-                                  paramValueVarUnits = NULL,
+                                  paramValueVal,
+                                  paramValueValUnits = NULL,
                                   timeLab, 
-                                  timeVar,
+                                  timeVal,
                                   colorLab = NULL, 
-                                  colorVar = NULL, 
+                                  colorVal = NULL, 
                                   shapeLab = NULL, 
-                                  shapeVar = NULL,
+                                  shapeVal = NULL,
                                   lln = NULL,
                                   uln = NULL,
                                   add_vars = NULL) {
@@ -398,12 +399,12 @@ linePlotHoverTemplate <- function(title,
   # title (usually the parameter name) and y value
   ht <- paste0(
     '<b>', title, '</b><br><br>',
-    '<i>Value</i>: ', paramValueVar
+    '<i>Value</i>: ', paramValueVal
   )
   
   # optionally add units for y value
-  if (!is.null(paramValueVarUnits)) {
-    units <- purrr::map_chr(paramValueVarUnits, \(x) {
+  if (!is.null(paramValueValUnits)) {
+    units <- purrr::map_chr(paramValueValUnits, \(x) {
       if (!is.na(x) & x != "") {
         paste0(' ', x, '<br>')
       } else {
@@ -416,17 +417,17 @@ linePlotHoverTemplate <- function(title,
   }
   
   # x value (time)
-  ht <- paste0(ht, '<i>', timeLab, '</i>: ', timeVar, '<br>')
+  ht <- paste0(ht, '<i>', timeLab, '</i>: ', timeVal, '<br>')
   
   ## optional variables
   # color
-  if (!is.null(colorLab) & !is.null(colorVar)) {
-    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVar, '<br>')
+  if (!is.null(colorLab) & !is.null(colorVal)) {
+    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
   }
   
   # shape
-  if (!is.null(shapeLab) & !is.null(shapeVar)) {
-    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVar, '<br>')
+  if (!is.null(shapeLab) & !is.null(shapeVal)) {
+    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
   }
   
   # ranges
