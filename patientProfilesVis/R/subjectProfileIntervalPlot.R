@@ -16,8 +16,28 @@
 #' @param caption (optional) String with caption (NULL for no caption). 
 #' By default the caption contains information on the imputation strategy 
 #' for missing time. 
-#' @param plotly_hover_text Named vector. If provided, plotly hover will include
-#' this information, in form of `<b>Name</b>: value`
+#' @param plotly_args a list with the following named values:
+#'   \itemize{
+#'     \item{`add_vars`}{an optional
+#'       named list with additional data that should be added to the plotly
+#'       tooltip. The names are the labels in the tooltip and the values are the
+#'       columns in `data` where the values will be pulled from; default is
+#'       `NULL`} 
+#'     \item{`margin`}{a named list of numeric values specifying the plot
+#'       margins, names should be `l` (left), `r` (right), `b` (bottom),
+#'       `t` (top), and `pad` (padding); default is
+#'       `list(l = 50, r = 50, b = 100, t = 50, pad = 4)`. This argument can be
+#'       adjusted along with `caption_y_shift` to adjust the caption vertical 
+#'       position in relationship to the plotting area.}
+#'     \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
+#'       vertical position of the caption. This values works with `margin` 
+#'       argument, specifically the bottom margin. Default is `-0.012`.} 
+#'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
+#'       should be scaled. If `'neg'`, only the negative values are scaled, if 
+#'       `'pos'` only the positive values are scaled, if `'both'` the positive 
+#'       and negative values are scaled. Default is `NULL`, in which case the 
+#'       default [plotly] x-axis scale is used.}
+#'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams clinUtils::formatVarForPlotLabel

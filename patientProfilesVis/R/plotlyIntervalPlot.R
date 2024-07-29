@@ -1,3 +1,18 @@
+#' Create a [plotly] interval plot
+#' 
+#' @details 
+#' This function is designed to be called by [subjectProfileIntervalPlot()].
+#'
+#' @param data a data frame with data for 1 subject only
+#' @inheritParams patientProfilesVis-common-args
+#' @inheritParams subjectProfileIntervalPlot
+#' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param caption_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param add_vars see [subjectProfileLinePlot()] argument `plotly_args`
+#'
+#' @returns a [plotly] object
+#'
 plotlyIntervalPlot <- function(data,
                                paramVar,
                                paramLab,
@@ -288,12 +303,13 @@ plotlyIntervalPlot <- function(data,
 
 #' Create [plotly] tool tip hover template for an interval plot
 #'
-#' @param title a string, the tool tip title
+#' @param paramVal the value of `paramVar` for the tooltip
+#' @param timeStartVal the value of `timeStartVar` for the tooltip
+#' @param timeEndVal the value of `timeEndVar` for the tooltip
+#' @param colorVal the value of `colorVar` for the tooltip
 #' @inheritParams patientProfilesVis-common-args
-#' @inheritParams subjectProfileLinePlot
-#' @inheritParams plotlyLinePlot
-#' @param lln,uln optional numeric values, the lower and upper limit normal
-#'   values, respectively
+#' @inheritParams subjectProfileIntervalPlot
+#' @inheritParams plotlyIntervalPlot
 #'
 #' @returns a string with html formatting
 #' 

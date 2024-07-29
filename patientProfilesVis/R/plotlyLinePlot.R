@@ -11,6 +11,7 @@
 #' @param yaxis_title_shift see [subjectProfileLinePlot()] argument
 #'   `plotly_args`
 #' @param legend_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param showspikes see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param log_footnote_y_shift see [subjectProfileLinePlot()] argument
@@ -46,6 +47,7 @@ plotlyLinePlot <- function(data,
                            ),
                            yaxis_title_shift = -0.035,
                            legend_x_shift = 1.2,
+                           showspikes = TRUE,
                            spikecolor = 'red',
                            log_x_axis = NULL,
                            log_footnote_y_shift = -0.1) {
@@ -290,6 +292,7 @@ plotlyLinePlot <- function(data,
   ) %>%
     plotly::layout(
       xaxis = list(
+        showspikes = FALSE,
         spikemode = 'across',
         spikecolor = spikecolor
       )
@@ -375,11 +378,11 @@ plotlyLinePlot <- function(data,
 #' @param timeVal the value of `timeVar` for the tooltip
 #' @param colorVal optional, the value of `colorVar` for the tooltip
 #' @param shapeVal optional, the value of `shapeVar` for the tooltip
+#' @param lln,uln optional numeric values, the lower and upper limit normal
+#'   values, respectively
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
 #' @inheritParams plotlyLinePlot
-#' @param lln,uln optional numeric values, the lower and upper limit normal
-#'   values, respectively
 #'
 #' @returns a string with html formatting
 #' 

@@ -96,8 +96,8 @@ test_that("plotlyIntervalPlot() returns the correct visualization", {
   )
   shapePalette <- c(
     Complete = "\u25A0",
-    "Missing start" = "\u25C2",
-    "Missing end" = "\u25B8"
+    "Missing start" = "\u25C4",
+    "Missing end" = "\u25BA"
   )
   shapeSize <- 15
   shapeLab <- "Start/End Time Status"

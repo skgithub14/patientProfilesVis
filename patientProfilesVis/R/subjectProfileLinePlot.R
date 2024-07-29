@@ -36,38 +36,38 @@
 #'   default.
 #' @param plotly_args a list with the following named values:
 #'   \itemize{
-#'     \item{`paramValueVarUnits`}{"an optional string, the column in `data`
+#'     \item{`paramValueVarUnits`}{an optional string, the column in `data`
 #'       with the parameter's units which will be added to the tooltip
-#'       information; default is `NULL`"} 
-#'     \item{`add_vars`}{"an optional
+#'       information; default is `NULL`} 
+#'     \item{`add_vars`}{an optional
 #'       named list with additional data that should be added to the plotly
 #'       tooltip. The names are the labels in the tooltip and the values are the
 #'       columns in `data` where the values will be pulled from; default is
-#'       `NULL`"} 
-#'     \item{`margin`}{"a named list of numeric values specifying the plot 
+#'       `NULL`} 
+#'     \item{`margin`}{a named list of numeric values specifying the plot 
 #'       margins, names should be `l` (left), `r` (right), `b` (bottom), 
 #'       `t` (top), and `pad` (padding); default is 
 #'       `list(l = 250, r = 250, b = 75, t = 50, pad = 4)`. This argument can be 
 #'       adjusted along with `yaxis_title_shift` and/or `legend_x_shift` to 
 #'       adjust the y-axis title location and legend positions, respectively, in 
-#'       relationship to the plotting area."}
-#'     \item{`yaxis_title_shift`}{"a numeric value (typically negative), adjusts
+#'       relationship to the plotting area.}
+#'     \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
 #'       y-axis title offset. This values works with `margin` argument, 
-#'       specifically the left margin. Default is `-0.035`."} 
-#'     \item{`legend_x_shift`}{"a numeric value (typically a decimal > 1), 
+#'       specifically the left margin. Default is `-0.035`.} 
+#'     \item{`legend_x_shift`}{a numeric value (typically a decimal > 1), 
 #'       adjusts legend x position. This values works with `margin` argument, 
-#'       specifically the right margin. Default is `1.2`."} 
-#'     \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
-#'     \item{`log_x_axis`}{"an optional string indicating if and how the x-axis 
+#'       specifically the right margin. Default is `1.2`.} 
+#'     \item{`spikecolor`}{a string, the spike line color; default is `'red'`}
+#'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
 #'       should be scaled. If `'neg'`, only the negative values are scaled, if 
 #'       `'pos'` only the positive values are scaled, if `'both'` the positive 
 #'       and negative values are scaled. Default is `NULL`, in which case the 
-#'       default [plotly] x-axis scale is used."}
-#'     \item{`log_footnote_y_shift`}{"a numeric value used to control the y 
+#'       default [plotly] x-axis scale is used.}
+#'     \item{`log_footnote_y_shift`}{a numeric value used to control the y 
 #'       position of the x-axis log scale footnote; only applicable if 
 #'       `log_x_axis` is not `NULL`. This is typically a negative number between 
 #'       0 and -1 and it works with the `margin` argument, specifically the 
-#'       bottom margin. Default is `-0.1`."}
+#'       bottom margin. Default is `-0.1`.}
 #'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
@@ -127,6 +127,7 @@ subjectProfileLinePlot <- function(
 	  ),
 	  yaxis_title_shift = -0.035,
 	  legend_x_shift = 1.2,
+	  showspikes = TRUE,
 	  spikecolor = 'red',
 	  log_x_axis = NULL,
 	  log_footnote_y_shift = -0.1
@@ -246,6 +247,9 @@ subjectProfileLinePlot <- function(
 	    if (is.null(plotly_args$legend_x_shift)) {
 	      plotly_args$legend_x_shift <- 1.2
 	    }
+	    if (is.null(plotly_args$showspikes)) {
+	      plotly_args$showspikes <- TRUE
+	    }
 	    if (is.null(plotly_args$spikecolor)) {
 	      plotly_args$spikecolor <- 'red'
 	    }
@@ -275,6 +279,7 @@ subjectProfileLinePlot <- function(
         margin = plotly_args$margin,
         yaxis_title_shift = plotly_args$yaxis_title_shift,
 	      legend_x_shift = plotly_args$legend_x_shift,
+	      showspikes = plotly_args$showspikes,
         spikecolor = plotly_args$spikecolor,
 	      log_x_axis = plotly_args$log_x_axis,
 	      log_footnote_y_shift = plotly_args$log_footnote_y_shift

@@ -2,18 +2,18 @@
 % Please edit documentation in R/plotlyLinePlot.R
 \name{linePlotHoverTemplate}
 \alias{linePlotHoverTemplate}
-\title{Create plotly tool tip hover template for a line plot}
+\title{Create [plotly] tool tip hover template for a line plot}
 \usage{
 linePlotHoverTemplate(
   title,
-  paramValueVar,
-  paramValueVarUnits = NULL,
+  paramValueVal,
+  paramValueValUnits = NULL,
   timeLab,
-  timeVar,
+  timeVal,
   colorLab = NULL,
-  colorVar = NULL,
+  colorVal = NULL,
   shapeLab = NULL,
-  shapeVar = NULL,
+  shapeVal = NULL,
   lln = NULL,
   uln = NULL,
   add_vars = NULL
@@ -22,28 +22,26 @@ linePlotHoverTemplate(
 \arguments{
 \item{title}{a string, the tool tip title}
 
-\item{paramValueVar}{String, variable of \code{data} with parameter value to
-represent.\cr Records with missing values are discarded.}
+\item{paramValueVal}{the value of `paramValueVar` for the tooltip}
+
+\item{paramValueValUnits}{the value of `paramValueVarUnits` for the tooltip}
 
 \item{timeLab}{String, label for \code{timeVar}.
 This is used in the message
 indicating missing values for \code{timeVar},
 and for the default label of the x-axis.}
 
-\item{timeVar}{String, variable of \code{data} with time,
-displayed in the x axis.\cr
-Records with missing time are not displayed in the plot.}
+\item{timeVal}{the value of `timeVar` for the tooltip}
 
 \item{colorLab}{String, label for \code{colorVar}.}
 
-\item{colorVar}{String, variable of \code{data} with color.}
+\item{colorVal}{optional, the value of `colorVar` for the tooltip}
 
 \item{shapeLab}{String, label for \code{shapeVar}.
 Set by default to \code{colorLab} if \code{colorVar}
 but not \code{shapeVar} is not specified.}
 
-\item{shapeVar}{String, variable of \code{data} for shape of the points.
-By default, same as \code{colorVar}.}
+\item{shapeVal}{optional, the value of `shapeVar` for the tooltip}
 
 \item{lln, uln}{optional numeric values, the lower and upper limit normal
 values, respectively}
@@ -54,9 +52,5 @@ values, respectively}
 a string with html formatting
 }
 \description{
-Create plotly tool tip hover template for a line plot
-}
-\details{
-This function is designed to called within a [plotly::plot_ly()] or
-[plotly::add_trace()] call for the `hovertemplate` argument.
+Create [plotly] tool tip hover template for a line plot
 }
