@@ -57,7 +57,10 @@
 #'     \item{`legend_x_shift`}{a numeric value (typically a decimal > 1), 
 #'       adjusts legend x position. This values works with `margin` argument, 
 #'       specifically the right margin. Default is `1.2`.} 
-#'     \item{`spikecolor`}{a string, the spike line color; default is `'red'`}
+#'     \item{`showspikes`}{a logical value, whether x-axis spikeline should be
+#'       displayed; default is `TRUE`}
+#'     \item{`spikecolor`}{a string, the spike line color; default is `'red'`, 
+#'       `showspikes` must be `TRUE` for this argument to take effect}
 #'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
 #'       should be scaled. If `'neg'`, only the negative values are scaled, if 
 #'       `'pos'` only the positive values are scaled, if `'both'` the positive 
