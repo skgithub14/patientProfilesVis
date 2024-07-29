@@ -40,10 +40,11 @@
 #'       with the parameter's units which will be added to the tooltip
 #'       information; default is `NULL`} 
 #'     \item{`add_vars`}{an optional
-#'       named list with additional data that should be added to the plotly
-#'       tooltip. The names are the labels in the tooltip and the values are the
-#'       columns in `data` where the values will be pulled from; default is
-#'       `NULL`} 
+#'       list with additional data that should be added to the [plotly]
+#'       tooltip. If named, the names are the labels in the tooltip. If unnamed, 
+#'       the tooltip labels from `labelVars` are used instead. The list values 
+#'       are the columns in `data` where the values will be pulled from; default 
+#'       is `NULL`} 
 #'     \item{`margin`}{a named list of numeric values specifying the plot 
 #'       margins, names should be `l` (left), `r` (right), `b` (bottom), 
 #'       `t` (top), and `pad` (padding); default is 
@@ -278,6 +279,7 @@ subjectProfileLinePlot <- function(
         timeLab = timeLab,
         title = title,
         xLab = xLab,
+	      labelVars = labelVars,
         add_vars = plotly_args$add_vars,
         margin = plotly_args$margin,
         yaxis_title_shift = plotly_args$yaxis_title_shift,

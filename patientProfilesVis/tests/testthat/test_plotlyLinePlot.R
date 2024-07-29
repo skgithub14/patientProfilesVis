@@ -296,6 +296,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   ## data prep
   data("dataSDTMCDISCP01", package = "clinUtils")
   dataSDTM <- dataSDTMCDISCP01
+  labelVarsSDTM <- attr(dataSDTM, "labelVars")
   dataLB <- dataSDTM$LB
   dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
   subjectLB <- "01-704-1445"
@@ -341,10 +342,11 @@ test_that("plotlyLinePlot() generates a line plot", {
     add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    )
+    ),
+    labelVars = labelVarsSDTM
   )
   
-  # plot without units
+  # plot without units, no missing names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -366,10 +368,11 @@ test_that("plotlyLinePlot() generates a line plot", {
     add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    )
+    ),
+    labelVars = 
   )
   
-  # plot without colors
+  # plot without colors, some missing names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -390,11 +393,12 @@ test_that("plotlyLinePlot() generates a line plot", {
     xLab = "Study Day",
     add_vars = list(
       Date = "LBDTC",
-      `Range Indicator` = "LBNRIND"
-    )
+      "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
   )
   
-  # plot without shapes
+  # plot without shapes, no names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -414,9 +418,10 @@ test_that("plotlyLinePlot() generates a line plot", {
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
     add_vars = list(
-      Date = "LBDTC",
-      `Range Indicator` = "LBNRIND"
-    )
+      "LBDTC",
+      "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
   )
   
   # plot without colors or shapes

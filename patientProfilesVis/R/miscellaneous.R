@@ -813,3 +813,37 @@ formatTimeLim <- function(data, subjectVar = "USUBJID",
 	return(timeLim)
 	
 }
+
+
+#' Format list of additional hover template variables for [plotly] chart
+#'
+#' @param data a data frame with the plotting data
+#' @param add_vars a list of column names in `data` to add to the hover
+#'   template. If some or all elements are unnamed, labels will be taken from
+#'   `labelVars`.
+#' @inheritParams patientProfilesVis-common-args
+#'
+#' @returns a named list
+#' 
+formatAdditionalPlotlyHoverVars <- function(data, add_vars, labelVars) {
+  
+  # get additional variable labels if not specified
+  if (is.null(names(add_vars))) {
+    add_var_names <- purrr::map(add_vars, \(x) labelVars[[x]][1])
+    names(add_vars) <- add_var_names
+  } else if (any(names(add_vars) == "")) {
+    add_var_names <- purrr::imap(add_vars, \(x, y) {
+      if (y == "") {
+        return(labelVars[[x]][1])
+      } else {
+        return(y)
+      }
+    })
+    names(add_vars) <- add_var_names
+  }
+  
+  # get additional variable values for use with linePlotHoverTemplate()
+  add_vars <- purrr::map(add_vars, \(x) data[[x]])
+  
+  return(add_vars)
+}

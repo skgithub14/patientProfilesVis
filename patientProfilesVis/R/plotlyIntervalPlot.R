@@ -33,6 +33,7 @@ plotlyIntervalPlot <- function(data,
                                xLab,
                                yLab,
                                caption,
+                               labelVars,
                                margin = list(
                                  l = 50,
                                  r = 50,
@@ -46,77 +47,26 @@ plotlyIntervalPlot <- function(data,
   
   # log the x-axis
   if (!is.null(log_x_axis)) {
-    if (!log_x_axis %in% c("pos", "neg", "both")) {
-      stop("log_x_axis must be either NULL, 'pos', 'neg', or 'both'")
-    }
-    
-    if (log_x_axis == "pos") {
-      data <- dplyr::mutate(
-        data,
-        dplyr::across(
-          c(!!rlang::sym(timeStartVar), !!rlang::sym(timeEndVar)),
-          ~ dplyr::if_else(. > 0, log(abs(.)), .),
-          .names = "{.col}Log"
-        )
-      )
-      footnote <- paste(
-        "Note: positive x-axis", 
-        "values are plotted on a log scale; however", 
-        "values in tooltip reflect actual",
-        timeStartLab, "and", timeEndLab,
-        "data."
-      )
-    } else if (log_x_axis == "neg") {
-      data <- dplyr::mutate(
-        data,
-        dplyr::across(
-          c(!!rlang::sym(timeStartVar), !!rlang::sym(timeEndVar)),
-          ~ dplyr::if_else(. < 0, -1 * log(abs(.)), .),
-          .names = "{.col}Log"
-        )
-      )
-      footnote <- paste(
-        "Note: negative x-axis", 
-        "values are plotted on a log scale; however", 
-        "values in tooltip reflect actual",
-        timeStartLab, "and", timeEndLab,
-        "data."
-      )
-    } else {
-      data <- dplyr::mutate(
-        data,
-        dplyr::across(
-          c(!!rlang::sym(timeStartVar), !!rlang::sym(timeEndVar)),
-          ~ dplyr::case_when(
-              . > 0 ~ log(abs(.)),
-              . < 0 ~ -1 * log(abs(.)),
-              TRUE ~ .
-          ),
-          .names = "{.col}Log"
-        )
-      )
-      footnote <- paste(
-        "Note: x-axis", 
-        "values are plotted on a log scale; however", 
-        "values in tooltip reflect actual",
-        timeStartLab, "and", timeEndLab,
-        "data."
-      )
-    }
-    caption <- paste0(caption, "<br>", footnote)
+    logOut <- logPlotlyXAxis(data = data, 
+                             xvars = c(timeStartVar, timeEndVar), 
+                             log_x_axis = log_x_axis)
+    data <- logOut$data
+    caption <- paste0(caption, "<br>", logOut$footnote)
   }
   
   # convert shape unicode and ggplot symbols to plotly symbol names
   shapePalettePlotly <- convert_shapes_to_plotly_symbols(shapes = shapePalette)
   
-  # treat tooltip hovertemplate column in the data
+  # create tooltip hovertemplate column in the data
   if (!is.null(colorVar)) {
     colorVarDat <- data[[colorVar]]
   } else {
     colorVarDat <- NULL
   }
   if (!is.null(add_vars)) {
-    add_vars <- purrr::map(add_vars, \(x) data[[x]])
+    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
+                                                add_vars = add_vars, 
+                                                labelVars = labelVars)
   }
   data <- dplyr::mutate(
     data,
@@ -258,12 +208,12 @@ plotlyIntervalPlot <- function(data,
       xaxis = list(
         title = xLab
       ),
-      xaxis = list(
+      yaxis = list(
         title = yLab
       ),
       legend = list(
         title = list(
-          text = if (!is.null(colorLab)) {
+          text = if (!is.null(colorVar)) {
             paste0("<b>", colorLab, " - ", shapeLab, "</b>")
           } else {
             paste0("<b>", shapeLab, "</b>")

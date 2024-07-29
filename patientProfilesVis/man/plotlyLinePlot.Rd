@@ -22,6 +22,7 @@ plotlyLinePlot(
   timeLab,
   title,
   xLab,
+  labelVars,
   add_vars = NULL,
   margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4),
   yaxis_title_shift = -0.035,
@@ -102,6 +103,9 @@ and for the default label of the x-axis.}
 \item{title}{String, title for the plot.}
 
 \item{xLab}{String, label for the x-axis.}
+
+\item{labelVars}{Named character vector with variable labels 
+(names are the variable code)}
 
 \item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
 

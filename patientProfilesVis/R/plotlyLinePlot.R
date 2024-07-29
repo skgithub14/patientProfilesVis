@@ -37,6 +37,7 @@ plotlyLinePlot <- function(data,
                            timeLab,
                            title,
                            xLab,
+                           labelVars,
                            add_vars = NULL,
                            margin = list(
                              l = 250,
@@ -54,53 +55,11 @@ plotlyLinePlot <- function(data,
   
   # log the x-axis
   if (!is.null(log_x_axis)) {
-    if (!log_x_axis %in% c("pos", "neg", "both")) {
-      stop("log_x_axis must be either NULL, 'pos', 'neg', or 'both'")
-    }
-    
-    if (log_x_axis == "pos") {
-      data <- dplyr::mutate(
-        data,
-        timeVarLog = dplyr::if_else(
-          !!rlang::sym(timeVar) > 0,
-          log(abs(!!rlang::sym(timeVar))),
-          !!rlang::sym(timeVar)
-        )
-      )
-      footnote <- paste(
-        "Note: positive", timeLab, 
-        "values are plotted on a log scale; however", timeLab, 
-        "values in tooltip reflect actual data."
-      )
-    } else if (log_x_axis == "neg") {
-      data <- dplyr::mutate(
-        data,
-        timeVarLog = dplyr::if_else(
-          !!rlang::sym(timeVar) < 0,
-          -1 * log(abs(!!rlang::sym(timeVar))),
-          !!rlang::sym(timeVar)
-        )
-      )
-      footnote <- paste(
-        "Note: negative", timeLab, 
-        "values are plotted on a log scale; however", timeLab, 
-        "values in tooltip reflect actual data."
-      )
-    } else {
-      data <- dplyr::mutate(
-        data,
-        timeVarLog = dplyr::case_when(
-          !!rlang::sym(timeVar) > 0 ~ log(abs(!!rlang::sym(timeVar))),
-          !!rlang::sym(timeVar) < 0 ~ -1 * log(abs(!!rlang::sym(timeVar))),
-          TRUE ~ !!rlang::sym(timeVar)
-        )
-      )
-      footnote <- paste(
-        "Note:", timeLab, 
-        "values are plotted on a log scale; however", timeLab, 
-        "values in tooltip reflect actual data."
-      )
-    }
+    logOut <- logPlotlyXAxis(data = data, 
+                             xvars = timeVar, 
+                             log_x_axis = log_x_axis)
+    data <- logOut$data
+    caption <- paste0(caption, "<br>", logOut$footnote)
   }
   
   # create tool tip column in data
@@ -127,7 +86,9 @@ plotlyLinePlot <- function(data,
     ulnDat <- NULL
   }
   if (!is.null(add_vars)) {
-    add_vars <- purrr::map(add_vars, \(x) data[[x]])
+    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
+                                                add_vars = add_vars, 
+                                                labelVars = labelVars)
   }
   data <- dplyr::mutate(
     data,

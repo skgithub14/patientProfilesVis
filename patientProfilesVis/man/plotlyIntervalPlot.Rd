@@ -25,6 +25,7 @@ plotlyIntervalPlot(
   xLab,
   yLab,
   caption,
+  labelVars,
   margin = list(l = 50, r = 50, b = 100, t = 50, pad = 4),
   caption_y_shift = -0.12,
   log_x_axis = NULL,
@@ -112,6 +113,9 @@ symbols should also be used.}
 \item{caption}{(optional) String with caption (NULL for no caption). 
 By default the caption contains information on the imputation strategy 
 for missing time.}
+
+\item{labelVars}{Named character vector with variable labels 
+(names are the variable code)}
 
 \item{margin}{see [subjectProfileLinePlot()] argument `plotly_args`}
 
