@@ -248,7 +248,11 @@ plotlyIntervalPlot <- function(data,
       ),
       legend = list(
         title = list(
-          text = paste0("<b>", colorLab, " - ", shapeLab, "</b>")
+          text = if (!is.null(colorLab)) {
+            paste0("<b>", colorLab, " - ", shapeLab, "</b>")
+          } else {
+            paste0("<b>", shapeLab, "</b>")
+          }
         )
       ),
       margin = margin

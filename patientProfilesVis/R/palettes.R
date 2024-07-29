@@ -126,8 +126,8 @@ convert_shapes_to_plotly_symbols <- function(shapes) {
       
       # add unicode characters used in interval plot defaults
       "\u25A0" = "square",
-      "\u25C2" = "triangle-left",
-      "\u25B8" = "triangle-right",
+      "\u25C4" = "triangle-left",
+      "\u25BA" = "triangle-right",
       
       stop(paste("no plotly shape corresponds to ggplot shape", shape))
     )

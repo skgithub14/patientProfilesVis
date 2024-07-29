@@ -138,6 +138,7 @@ test_that("plotlyIntervalPlot() returns the correct visualization", {
   timeShapePalette <- resMSED$timeShapePalette
   caption <- if(!missing(caption)){caption}else{resMSED$caption}
   
+  # with colorVar specified
   plotlyIntervalPlot(
     data = data,
     paramVar = paramVar,
@@ -161,11 +162,138 @@ test_that("plotlyIntervalPlot() returns the correct visualization", {
     caption = caption
   )
   
+  # without colorVar specified
+  plotlyIntervalPlot(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndLab,
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette =  getColorPalettePatientProfile(n = 1),
+    alpha = alpha,
+    timeStartShapeVar = timeStartShapeVar,
+    timeEndShapeVar = timeEndShapeVar,
+    shapePalette = shapePalette,
+    shapeLab = shapeLab,
+    shapeSize = shapeSize,
+    title = title,
+    xLab = xLab,
+    yLab = yLab,
+    caption = caption
+  )
+  
+  # with additional tool tip variables
+  plotlyIntervalPlot(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndLab,
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette =  getColorPalettePatientProfile(n = 1),
+    alpha = alpha,
+    timeStartShapeVar = timeStartShapeVar,
+    timeEndShapeVar = timeEndShapeVar,
+    shapePalette = shapePalette,
+    shapeLab = shapeLab,
+    shapeSize = shapeSize,
+    title = title,
+    xLab = xLab,
+    yLab = yLab,
+    caption = caption,
+    add_vars = list(
+      Subject = "USUBJID"
+    )
+  )
+  
+  # with logged pos x-values
+  plotlyIntervalPlot(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndLab,
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette =  getColorPalettePatientProfile(n = 1),
+    alpha = alpha,
+    timeStartShapeVar = timeStartShapeVar,
+    timeEndShapeVar = timeEndShapeVar,
+    shapePalette = shapePalette,
+    shapeLab = shapeLab,
+    shapeSize = shapeSize,
+    title = title,
+    xLab = xLab,
+    yLab = yLab,
+    caption = caption,
+    log_x_axis = "pos"
+  )
+  
+  # with logged new x-values
+  plotlyIntervalPlot(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndLab,
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette =  getColorPalettePatientProfile(n = 1),
+    alpha = alpha,
+    timeStartShapeVar = timeStartShapeVar,
+    timeEndShapeVar = timeEndShapeVar,
+    shapePalette = shapePalette,
+    shapeLab = shapeLab,
+    shapeSize = shapeSize,
+    title = title,
+    xLab = xLab,
+    yLab = yLab,
+    caption = caption,
+    log_x_axis = "neg"
+  )
+  
+  # with logged x-values and caption y shift
+  plotlyIntervalPlot(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndLab,
+    colorVar = NULL,
+    colorLab = NULL,
+    colorPalette =  getColorPalettePatientProfile(n = 1),
+    alpha = alpha,
+    timeStartShapeVar = timeStartShapeVar,
+    timeEndShapeVar = timeEndShapeVar,
+    shapePalette = shapePalette,
+    shapeLab = shapeLab,
+    shapeSize = shapeSize,
+    title = title,
+    xLab = xLab,
+    yLab = yLab,
+    caption = caption,
+    log_x_axis = "both",
+    caption_y_shift = -0.15
+  )
+  
 })
 
 
 
-test_that("subjectProfileIntervalPlot()", {
+test_that("subjectProfileIntervalPlot() with plotly option can return outputs correctly", {
   
   ## data prep
   data("dataSDTMCDISCP01", package = "clinUtils")
@@ -173,19 +301,51 @@ test_that("subjectProfileIntervalPlot()", {
   dataAE <- dataSDTM$AE
   subjectAE <- "01-718-1427"
   dataAE <- dplyr::filter(dataAE, USUBJID == subjectAE)
-  dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], 
-                              levels = c("MILD", "MODERATE", "SEVERE"))
+  dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], levels = c("MILD", "MODERATE", "SEVERE"))
+  data <- dataAE
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
+  # for one subject
   aePlots <- subjectProfileIntervalPlot(
-    data = dataAE,
+    data = data,
     paramVar = "AETERM",
     timeStartVar = "AESTDY",
     timeEndVar = "AEENDY",
     colorVar = "AESEV",
     labelVars = labelVarsSDTM,
     title = "Adverse events",
-    plotly = T
+    shapeSize = 10,
+    plotly = T,
+    timeImpType = "none"
   )
+  
+  aePlots$`01-718-1427`
+  
+  ## data prep
+  data("dataSDTMCDISCP01", package = "clinUtils")
+  dataSDTM <- dataSDTMCDISCP01
+  dataAE <- dataSDTM$AE
+  subjectAE <- c("01-718-1427", "01-701-1148")
+  dataAE <- dplyr::filter(dataAE, USUBJID %in% subjectAE)
+  dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], levels = c("MILD", "MODERATE", "SEVERE"))
+  data <- dataAE
+  labelVarsSDTM <- attr(dataSDTM, "labelVars")
+  
+  # for two subjects
+  aePlots <- subjectProfileIntervalPlot(
+    data = data,
+    paramVar = "AETERM",
+    timeStartVar = "AESTDY",
+    timeEndVar = "AEENDY",
+    colorVar = "AESEV",
+    labelVars = labelVarsSDTM,
+    title = "Adverse events",
+    shapeSize = 10,
+    plotly = T,
+    timeImpType = "none"
+  )
+  
+  aePlots$`01-718-1427`
+  aePlots$`01-701-1148`
   
 })
