@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotlyLinePlot.R
 \name{plotlyLinePlot}
 \alias{plotlyLinePlot}
-\title{Create a plotly line plot facetted by paramFacetVar}
+\title{Create a [plotly] line plot facetted by `paramFacetVar` for a subject}
 \usage{
 plotlyLinePlot(
   data,
@@ -129,7 +129,7 @@ and for the default label of the x-axis.}
 a [plotly] object
 }
 \description{
-Create a plotly line plot facetted by paramFacetVar
+Create a [plotly] line plot facetted by `paramFacetVar` for a subject
 }
 \details{
 This function is designed to be called by [subjectProfileLinePlot()].

@@ -1,3 +1,20 @@
+#' Create a [plotly] event plot for a subject
+#' 
+#' @details 
+#' This function is designed to be called by [subjectProfileEventPlot()].
+#'
+#' @param data a data frame with data for 1 subject only
+#' @param margin see [subjectProfileEventPlot()] argument `plotly_args`
+#' @param log_footnote_y_shift see [subjectProfileEventPlot()] argument
+#'   `plotly_args`
+#' @param log_x_axis see [subjectProfileEventPlot()] argument `plotly_args`
+#' @param add_vars see [subjectProfileEventPlot()] argument `plotly_args`
+#' @inheritParams patientProfilesVis-common-args
+#' @inheritParams subjectProfileEventPlot
+#'
+#' @returns a [plotly] object
+#' @export
+#'
 plotlyEventPlot <- function(data,
                             paramLab,
                             colorVar, 
@@ -21,7 +38,7 @@ plotlyEventPlot <- function(data,
                               t = 50,
                               pad = 4
                             ),
-                            caption_y_shift = -0.12,
+                            log_footnote_y_shift = -0.12,
                             log_x_axis = NULL,
                             add_vars = NULL) {
   
@@ -179,7 +196,7 @@ plotlyEventPlot <- function(data,
       xref = "paper",
       yref = "paper",
       x = 0,
-      y = caption_y_shift,
+      y = log_footnote_y_shift,
       showarrow = FALSE,
       align = "left"
     )

@@ -1,4 +1,4 @@
-#' Create a [plotly] interval plot
+#' Create a [plotly] interval plot for a subject
 #' 
 #' @details 
 #' This function is designed to be called by [subjectProfileIntervalPlot()].
@@ -6,12 +6,14 @@
 #' @param data a data frame with data for 1 subject only
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileIntervalPlot
-#' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param caption_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param add_vars see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param margin see [subjectProfileIntervalPlot()] argument `plotly_args`
+#' @param caption_y_shift see [subjectProfileIntervalPlot()] argument
+#'   `plotly_args`
+#' @param log_x_axis see [subjectProfileIntervalPlot()] argument `plotly_args`
+#' @param add_vars see [subjectProfileIntervalPlot()] argument `plotly_args`
 #'
 #' @returns a [plotly] object
+#' @export
 #'
 plotlyIntervalPlot <- function(data,
                                paramVar,

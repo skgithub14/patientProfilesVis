@@ -37,7 +37,7 @@ displayed in a message and in the plot caption.}
 
 \item{colorVal}{the value of `colorVar` for the tooltip}
 
-\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
 }
 \value{
 a string with html formatting

@@ -4,6 +4,31 @@
 #' This variable is used
 #' for the colors and the filling of the points.
 #' @param title String with title, label of the parameter variable by default.
+#' @param plotly_args a list with the following named values:
+#'   \itemize{
+#'     \item{`add_vars`}{an optional
+#'       list with additional data that should be added to the [plotly]
+#'       tooltip. If named, the names are the labels in the tooltip. If unnamed, 
+#'       the tooltip labels from `labelVars` are used instead. The list values 
+#'       are the columns in `data` where the values will be pulled from; default 
+#'       is `NULL`} 
+#'     \item{`margin`}{a named list of numeric values specifying the plot
+#'       margins, names should be `l` (left), `r` (right), `b` (bottom),
+#'       `t` (top), and `pad` (padding); default is
+#'       `list(l = 50, r = 50, b = 50, t = 50, pad = 4)`. This argument can be
+#'       adjusted along with `caption_y_shift` to adjust the caption vertical 
+#'       position in relationship to the plotting area.}
+#'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
+#'       should be scaled. If `'neg'`, only the negative values are scaled, if 
+#'       `'pos'` only the positive values are scaled, if `'both'` the positive 
+#'       and negative values are scaled. Default is `NULL`, in which case the 
+#'       default [plotly] x-axis scale is used.}
+#'     \item{`log_footnote_y_shift`}{a numeric value used to control the y 
+#'       position of the x-axis log scale footnote; only applicable if 
+#'       `log_x_axis` is not `NULL`. This is typically a negative number between 
+#'       0 and -1 and it works with the `margin` argument, specifically the 
+#'       bottom margin. Default is `-0.12`.}
+#'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams getPageVar
@@ -43,7 +68,20 @@ subjectProfileEventPlot <- function(
 	label = title,
 	labelVars = NULL,
 	formatReport = subjectProfileReportFormat(),
-	paging = TRUE
+	paging = TRUE,
+	plotly = FALSE,
+	plotly_args = list(
+	  margin = list(
+	    l = 50,
+	    r = 50,
+	    b = 50,
+	    t = 50,
+	    pad = 4
+	  ),
+	  log_footnote_y_shift = -0.12,
+	  log_x_axis = NULL,
+	  add_vars = NULL
+	)
 ){
 	
 	# in case data is a tibble:
@@ -106,130 +144,183 @@ subjectProfileEventPlot <- function(
 				
 		subject <- unique(dataSubject[, subjectVar])
 		
-		# split plot into multiple page(s)
-		dataSubject <- getPageVar(
-			data = dataSubject, 
-			var = "yVar", typeVar = "y",
-			formatReport = formatReport,
-			title = !is.null(title),
-			xLab = !is.null(xLab),
-			caption = FALSE,
-			paging = paging
-		)	
+		if (plotly) {
+		  
+		  # reset defaults if they were dropped from `plotly_args`
+		  if (is.null(plotly_args$margin)) {
+		    plotly_args$margin <- list(l = 250, r = 250, b = 75, t = 50, pad = 4)
+		  }
+		  if (is.null(plotly_args$yaxis_title_shift)) {
+		    plotly_args$yaxis_title_shift <- -0.035
+		  }
+		  if (is.null(plotly_args$legend_x_shift)) {
+		    plotly_args$legend_x_shift <- 1.2
+		  }
+		  if (is.null(plotly_args$showspikes)) {
+		    plotly_args$showspikes <- TRUE
+		  }
+		  if (is.null(plotly_args$spikecolor)) {
+		    plotly_args$spikecolor <- 'red'
+		  }
+		  if (is.null(plotly_args$log_footnote_y_shift)) {
+		    plotly_args$log_footnote_y_shift <- -0.1
+		  }
+		  
+		  pltly <- plotlyEventPlot(
+		    data = data,
+        paramLab = paramLab,
+        colorVar = colorVar, 
+        colorLab = colorLab,
+        colorPalette = colorPalette,
+        shapeVar = shapeVar, 
+        shapeLab = shapeLab,
+        shapePalette = shapePalette,
+        alpha = alpha,
+        timeVar = timeVar, 
+        timeLab = timeLab,
+        # timeLim = NULL,
+        xLab = xLab,
+        yLab = yLab,
+        title = title,
+        labelVars = NULL,
+        margin = plotly_args$margin,
+        log_footnote_y_shift = plotly_args$log_footnote_y_shift,
+        log_x_axis = plotly_args$log_x_axis,
+        add_vars =plotly_args$add_vars
+		  )
+		  
+		  ## set attributes
+		  
+		  attr(pltly, 'metaData') <- list(subjectID = subject)
+		  
+		  return(pltly)
+		  
+		} else {
 		
-		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
-					
-			aesArgs <- c(
-				list(x = sym(timeVar), y = sym("yVar")),
-				if(!is.null(colorVar))	list(fill = sym(colorVar), color = sym(colorVar)),
-				if(!is.null(shapeVar))	list(shape = sym(shapeVar))
-			)
-			
-			argsGeomPoint <- list(
-			  mapping = do.call(aes, aesArgs),
-			  size = 3, alpha = alpha
-			)
-			if(packageVersion("ggplot2") >= "3.5.0"){
-			  showLegend <- c(
-			    if(!is.null(colorVar)) c(color = TRUE, fill = TRUE),
-			    if(!is.null(shapeVar))	c(shape = TRUE)
-			  )
-			  if(length(showLegend) > 0)
-			    argsGeomPoint[["show.legend"]] <- showLegend
-			}
-				
-			# create the plot
-			gg <- ggplot(data = dataSubjectPage) +
-			  do.call(geom_point, argsGeomPoint) +
-				scale_y_discrete(drop = TRUE) +
-				subjectProfileTheme()
-		
-			if(!is.null(title))
-				gg <- gg + ggtitle(title)
-			
-			if(!is.null(xLab))
-				gg <- gg + xlab(xLab)
-			
-			if(!is.null(yLab))
-				gg <- gg + ylab(yLab)
-				
-			# color palette and name for color legend
-			if(!is.null(colorVar)){
-				gg <- gg + 
-					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
-					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "fill")
-			}else{
-				gg <- gg + 
-					scale_color_manual(values = colorPalette) +
-					scale_fill_manual(values = colorPalette)
-			}
-			
-			# change name for color scale
-			if(!is.null(shapeVar))
-				gg <- gg + getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")
-			
-			argsScaleX <- c(
-				if(!is.null(timeExpand))	list(expand = timeExpand),
-				if(!is.null(timeTrans))	list(trans = timeTrans)
-			)
-			if(length(argsScaleX) > 0)
-				gg <- gg + do.call("scale_x_continuous", argsScaleX)
-			
-			# set time limits for the x-axis
-			# default: TRUE in case time limits are changed afterwards
-			if(!is.null(timeLim)){
-				timeLimSubject <- if(is.list(timeLim))	timeLim[[subject]]	else	timeLim
-				gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
-			}
-			
-			## extract number of lines
-			
-			# labels y-axis:
-			nLines <- countNLines(unique(dataSubjectPage[, "yVar"]))
-			nLinesPlot <- sum(nLines) + 0.8 * (length(nLines) - 1)
-			
-			# legend:
-			nLinesLegendColor <- if(!is.null(colorVar)){
-				getNLinesLegend(values = colorPalette, title = colorLab)
-			}else	0
-			nLinesLegendShape <- if(!is.null(shapeVar)){
-				getNLinesLegend(values = shapePalette, title = shapeLab)
-			}else	0
-			nLinesLegend <- 0 +
-				if(!is.null(colorVar) & !is.null(shapeVar)){
-					# one legend (ggplot will create separate legend if the title differ)
-					if(colorVar == shapeVar && !is.null(colorLab) & !is.null(shapeLab) && shapeLab == colorLab){
-						nLinesLegendColor 
-					# two legends
-					}else{
-						# 1 line to separate the two legends if color and shape are specified and different
-						nLinesLegendColor + nLinesLegendShape + 1
-					}
-				}else	if(!is.null(colorVar)){
-					nLinesLegendColor
-				}else	if(!is.null(shapeVar)){
-					nLinesLegendShape
-				}else	0
-			
-			nLinesPlot <- max(sum(nLinesPlot), nLinesLegend)	
-			
-			# in title and axes
-			nLinesTitleAndXAxis <- sum(c(
-				getNLinesLabel(value = title, elName = "title"), 
-				getNLinesLabel(value = xLab, elName = "x")
-			))
-			nLines <- nLinesPlot + nLinesTitleAndXAxis
-
-			## set attributes
-			
-			attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
-			class(gg) <- c("subjectProfileEventPlot", class(gg))
-			
-			gg
-			
-		})
-		
-	})
+  		# split plot into multiple page(s)
+  		dataSubject <- getPageVar(
+  			data = dataSubject, 
+  			var = "yVar", typeVar = "y",
+  			formatReport = formatReport,
+  			title = !is.null(title),
+  			xLab = !is.null(xLab),
+  			caption = FALSE,
+  			paging = paging
+  		)	
+  		
+  		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
+  					
+  			aesArgs <- c(
+  				list(x = sym(timeVar), y = sym("yVar")),
+  				if(!is.null(colorVar))	list(fill = sym(colorVar), color = sym(colorVar)),
+  				if(!is.null(shapeVar))	list(shape = sym(shapeVar))
+  			)
+  			
+  			argsGeomPoint <- list(
+  			  mapping = do.call(aes, aesArgs),
+  			  size = 3, alpha = alpha
+  			)
+  			if(packageVersion("ggplot2") >= "3.5.0"){
+  			  showLegend <- c(
+  			    if(!is.null(colorVar)) c(color = TRUE, fill = TRUE),
+  			    if(!is.null(shapeVar))	c(shape = TRUE)
+  			  )
+  			  if(length(showLegend) > 0)
+  			    argsGeomPoint[["show.legend"]] <- showLegend
+  			}
+  				
+  			# create the plot
+  			gg <- ggplot(data = dataSubjectPage) +
+  			  do.call(geom_point, argsGeomPoint) +
+  				scale_y_discrete(drop = TRUE) +
+  				subjectProfileTheme()
+  		
+  			if(!is.null(title))
+  				gg <- gg + ggtitle(title)
+  			
+  			if(!is.null(xLab))
+  				gg <- gg + xlab(xLab)
+  			
+  			if(!is.null(yLab))
+  				gg <- gg + ylab(yLab)
+  				
+  			# color palette and name for color legend
+  			if(!is.null(colorVar)){
+  				gg <- gg + 
+  					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
+  					getAesScaleManual(lab = colorLab, palette = colorPalette, type = "fill")
+  			}else{
+  				gg <- gg + 
+  					scale_color_manual(values = colorPalette) +
+  					scale_fill_manual(values = colorPalette)
+  			}
+  			
+  			# change name for color scale
+  			if(!is.null(shapeVar))
+  				gg <- gg + getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")
+  			
+  			argsScaleX <- c(
+  				if(!is.null(timeExpand))	list(expand = timeExpand),
+  				if(!is.null(timeTrans))	list(trans = timeTrans)
+  			)
+  			if(length(argsScaleX) > 0)
+  				gg <- gg + do.call("scale_x_continuous", argsScaleX)
+  			
+  			# set time limits for the x-axis
+  			# default: TRUE in case time limits are changed afterwards
+  			if(!is.null(timeLim)){
+  				timeLimSubject <- if(is.list(timeLim))	timeLim[[subject]]	else	timeLim
+  				gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
+  			}
+  			
+  			## extract number of lines
+  			
+  			# labels y-axis:
+  			nLines <- countNLines(unique(dataSubjectPage[, "yVar"]))
+  			nLinesPlot <- sum(nLines) + 0.8 * (length(nLines) - 1)
+  			
+  			# legend:
+  			nLinesLegendColor <- if(!is.null(colorVar)){
+  				getNLinesLegend(values = colorPalette, title = colorLab)
+  			}else	0
+  			nLinesLegendShape <- if(!is.null(shapeVar)){
+  				getNLinesLegend(values = shapePalette, title = shapeLab)
+  			}else	0
+  			nLinesLegend <- 0 +
+  				if(!is.null(colorVar) & !is.null(shapeVar)){
+  					# one legend (ggplot will create separate legend if the title differ)
+  					if(colorVar == shapeVar && !is.null(colorLab) & !is.null(shapeLab) && shapeLab == colorLab){
+  						nLinesLegendColor 
+  					# two legends
+  					}else{
+  						# 1 line to separate the two legends if color and shape are specified and different
+  						nLinesLegendColor + nLinesLegendShape + 1
+  					}
+  				}else	if(!is.null(colorVar)){
+  					nLinesLegendColor
+  				}else	if(!is.null(shapeVar)){
+  					nLinesLegendShape
+  				}else	0
+  			
+  			nLinesPlot <- max(sum(nLinesPlot), nLinesLegend)	
+  			
+  			# in title and axes
+  			nLinesTitleAndXAxis <- sum(c(
+  				getNLinesLabel(value = title, elName = "title"), 
+  				getNLinesLabel(value = xLab, elName = "x")
+  			))
+  			nLines <- nLinesPlot + nLinesTitleAndXAxis
+  
+  			## set attributes
+  			
+  			attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
+  			class(gg) <- c("subjectProfileEventPlot", class(gg))
+  			
+  			gg
+  			
+  		})
+		}
+  })
 
 	# metaData:
 	# stored plot label

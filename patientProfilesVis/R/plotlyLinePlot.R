@@ -1,4 +1,4 @@
-#' Create a plotly line plot facetted by paramFacetVar
+#' Create a [plotly] line plot facetted by `paramFacetVar` for a subject
 #' 
 #' @details 
 #' This function is designed to be called by [subjectProfileLinePlot()].

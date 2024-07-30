@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotlyIntervalPlot.R
 \name{plotlyIntervalPlot}
 \alias{plotlyIntervalPlot}
-\title{Create a [plotly] interval plot}
+\title{Create a [plotly] interval plot for a subject}
 \usage{
 plotlyIntervalPlot(
   data,
@@ -117,19 +117,20 @@ for missing time.}
 \item{labelVars}{Named character vector with variable labels 
 (names are the variable code)}
 
-\item{margin}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{margin}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
 
-\item{caption_y_shift}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{caption_y_shift}{see [subjectProfileIntervalPlot()] argument
+`plotly_args`}
 
-\item{log_x_axis}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{log_x_axis}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
 
-\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
 }
 \value{
 a [plotly] object
 }
 \description{
-Create a [plotly] interval plot
+Create a [plotly] interval plot for a subject
 }
 \details{
 This function is designed to be called by [subjectProfileIntervalPlot()].
