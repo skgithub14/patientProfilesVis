@@ -48,7 +48,8 @@ Each sublist contains:
 named by module. If NULL, no transformation are done.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
-(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
+(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+Only applicable to [ggplot2] outputs.}
 }
 \value{
 \code{subjectProfilePlot} object, containing the combined

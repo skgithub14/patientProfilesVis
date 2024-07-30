@@ -52,7 +52,8 @@ subjectProfileIntervalPlot(
   formatReport = subjectProfileReportFormat(),
   paging = TRUE,
   plotly = FALSE,
-  plotly_hover_text = NULL
+  plotly_args = list(margin = list(l = 50, r = 50, b = 100, t = 50, pad = 4),
+    caption_y_shift = -0.12, log_x_axis = NULL, add_vars = NULL)
 )
 }
 \arguments{
@@ -152,7 +153,8 @@ argument is ignored for plotly outputs; if relevant see
 `plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
-(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
+(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+Only applicable to [ggplot2] outputs.}
 
 \item{timeAlign}{Logical, if TRUE (by default)
 the different plots are horizontally aligned.
@@ -229,10 +231,32 @@ to be re-sized in order that the plot fits.
 \cr
 If FALSE, the entire plot is included in one single page.}
 
-\item{plotly}{Boolean. If TRUE, generate a plotly output, if not, ggplot.}
+\item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
+[ggplot2] output; default is `FALSE`}
 
-\item{plotly_hover_text}{Named vector. If provided, plotly hover will include
-this information, in form of `<b>Name</b>: value`}
+\item{plotly_args}{a list with the following named values:
+\itemize{
+  \item{`add_vars`}{an optional
+    list with additional data that should be added to the [plotly]
+    tooltip. If named, the names are the labels in the tooltip. If unnamed, 
+    the tooltip labels from `labelVars` are used instead. The list values 
+    are the columns in `data` where the values will be pulled from; default 
+    is `NULL`} 
+  \item{`margin`}{a named list of numeric values specifying the plot
+    margins, names should be `l` (left), `r` (right), `b` (bottom),
+    `t` (top), and `pad` (padding); default is
+    `list(l = 50, r = 50, b = 100, t = 50, pad = 4)`. This argument can be
+    adjusted along with `caption_y_shift` to adjust the caption vertical 
+    position in relationship to the plotting area.}
+  \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
+    vertical position of the caption. This values works with `margin` 
+    argument, specifically the bottom margin. Default is `-0.012`.} 
+  \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
+    should be scaled. If `'neg'`, only the negative values are scaled, if 
+    `'pos'` only the positive values are scaled, if `'both'` the positive 
+    and negative values are scaled. Default is `NULL`, in which case the 
+    default [plotly] x-axis scale is used.}
+}}
 }
 \value{
 list of (across subjects) of list (across pages) 

@@ -77,3 +77,61 @@ getColorPalettePatientProfile <- function(..., includeNA = TRUE){
 	return(palette)
 	
 }
+
+
+#' Convert [ggplot2] shapes and some unicode characters to [plotly] symbols
+#'
+#' @param shapes a numeric or character vector representing [ggplot2] shapes
+#'
+#' @returns a character vector, the corresponding [plotly] shape name
+#'
+convert_shapes_to_plotly_symbols <- function(shapes) {
+  
+  convert_shape <- function(shape) {
+    
+    # convert ggplot shape from character to numeric
+    if (!grepl("^[[:digit:]]+L*$", shape)) {
+      shape <- ggplot2::translate_shape_string(shape)
+    }
+    
+    shape <- as.character(shape)
+    switch(
+      shape,
+      "0" = "square-open",
+      "1" = "circle-open",
+      "2" = "triangle-up-open",
+      "3" = "cross-thin",
+      "4" = "x-thin",
+      "5" = "diamond-open",
+      "6" = "triangle-down-open",
+      "7" = "square-x-open",
+      "8" = "asterisk-open",
+      "9" = "diamond-cross-open",
+      "10" = "circle-cross-open",
+      "11" = "hourglass-open",
+      "12" = "square-cross-open",
+      "13" = "circle-x-open",
+      # "14" # no equivalent
+      "15" = "square-dot", 
+      "16" = "circle-dot", 
+      "17" = "triangle-up",
+      "18" = "diamond-dot",
+      "19" = "circle-dot",
+      "20" = "circle-dot",
+      "21" = "circle-dot",
+      "22" = "square-dot",
+      "23" = "diamond-dot",
+      "24" = "triangle-up",
+      "25" = "triangle-down",
+      
+      # add unicode characters used in interval plot defaults
+      "\u25A0" = "square",
+      "\u25C4" = "triangle-left",
+      "\u25BA" = "triangle-right",
+      
+      stop(paste("no plotly shape corresponds to ggplot shape", shape))
+    )
+  }
+  
+  purrr::map_chr(shapes, \(shape) convert_shape(shape))
+}

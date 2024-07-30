@@ -46,10 +46,9 @@ subjectProfileLinePlot(
   alpha = 1,
   shapeSize = rel(1),
   plotly = FALSE,
-  plotly_args = list(paramValueVarUnits = NULL, add_vars = NULL, facetVarMaxLength = 30,
-    margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035,
-    legend_x_shift = 1.2, spikecolor = "red", log_x_axis = NULL, log_footnote_y_shift =
-    -0.1)
+  plotly_args = list(paramValueVarUnits = NULL, add_vars = NULL, margin = list(l = 250, r
+    = 50, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035, showspikes = TRUE,
+    spikecolor = "red", log_x_axis = NULL, log_footnote_y_shift = -0.1)
 )
 }
 \arguments{
@@ -148,7 +147,8 @@ argument is ignored for plotly outputs; if relevant see
 `plotly_args$log_x_axis` argument instead.}
 
 \item{timeExpand}{Vector of range expansion constants for the time axis
-(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}).}
+(see \code{expand} parameter in \code{\link[ggplot2]{scale_x_continuous}}). 
+Only applicable to [ggplot2] outputs.}
 
 \item{subjectVar}{String, variable of \code{data} with subject ID}
 
@@ -224,41 +224,39 @@ recommend setting this value to `7` or higher.}
 
 \item{plotly_args}{a list with the following named values:
 \itemize{
-  \item{`paramValueVarUnits`}{"an optional string, the column in `data`
+  \item{`paramValueVarUnits`}{an optional string, the column in `data`
     with the parameter's units which will be added to the tooltip
-    information; default is `NULL`"} 
-  \item{`add_vars`}{"an optional
-    named list with additional data that should be added to the plotly
-    tooltip. The names are the labels in the tooltip and the values are the
-    columns in `data` where the values will be pulled from; default is
-    `NULL`"} 
-  \item{`facetVarMaxLength`}{"a numeric value, the maximum number
-    of characters allowed in an entry in the `data$paramFacetVar` column
-    before line breaks will be added at every space"} 
-  \item{`margin`}{"a named list of numeric values specifying the plot 
+    information; default is `NULL`} 
+  \item{`add_vars`}{an optional
+    list with additional data that should be added to the [plotly]
+    tooltip. If named, the names are the labels in the tooltip. If unnamed, 
+    the tooltip labels from `labelVars` are used instead. The list values 
+    are the columns in `data` where the values will be pulled from; default 
+    is `NULL`} 
+  \item{`margin`}{a named list of numeric values specifying the plot 
     margins, names should be `l` (left), `r` (right), `b` (bottom), 
     `t` (top), and `pad` (padding); default is 
-    `list(l = 250, r = 250, b = 75, t = 50, pad = 4)`. This argument can be 
-    adjusted along with `yaxis_title_shift` and/or `legend_x_shift` to 
-    adjust the y-axis title location and legend positions, respectively, in 
-    relationship to the plotting area."}
-  \item{`yaxis_title_shift`}{"a numeric value (typically negative), adjusts
+    `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This argument can be 
+    adjusted along with `yaxis_title_shift` to 
+    adjust the y-axis title location in 
+    relationship to the plotting area.}
+  \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
     y-axis title offset. This values works with `margin` argument, 
-    specifically the left margin. Default is `-0.035`."} 
-  \item{`legend_x_shift`}{"a numeric value (typically a decimal > 1), 
-    adjusts legend x position. This values works with `margin` argument, 
-    specifically the right margin. Default is `1.2`."} 
-  \item{`spikecolor`}{"a string, the spike line color; default is `'red'`"}
-  \item{`log_x_axis`}{"an optional string indicating if and how the x-axis 
+    specifically the left margin. Default is `-0.035`.} 
+  \item{`showspikes`}{a logical value, whether x-axis spikeline should be
+    displayed; default is `TRUE`}
+  \item{`spikecolor`}{a string, the spike line color; default is `'red'`, 
+    `showspikes` must be `TRUE` for this argument to take effect}
+  \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
     should be scaled. If `'neg'`, only the negative values are scaled, if 
     `'pos'` only the positive values are scaled, if `'both'` the positive 
     and negative values are scaled. Default is `NULL`, in which case the 
-    default [plotly] x-axis scale is used."}
-  \item{`log_footnote_y_shift`}{"a numeric value used to control the y 
+    default [plotly] x-axis scale is used.}
+  \item{`log_footnote_y_shift`}{a numeric value used to control the y 
     position of the x-axis log scale footnote; only applicable if 
     `log_x_axis` is not `NULL`. This is typically a negative number between 
     0 and -1 and it works with the `margin` argument, specifically the 
-    bottom margin. Default is `-0.1`."}
+    bottom margin. Default is `-0.1`.}
 }}
 }
 \value{

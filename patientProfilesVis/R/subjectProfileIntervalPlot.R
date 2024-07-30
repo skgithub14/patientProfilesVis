@@ -16,9 +16,29 @@
 #' @param caption (optional) String with caption (NULL for no caption). 
 #' By default the caption contains information on the imputation strategy 
 #' for missing time. 
-#' @param plotly Boolean. If TRUE, generate a plotly output, if not, ggplot.
-#' @param plotly_hover_text Named vector. If provided, plotly hover will include
-#' this information, in form of `<b>Name</b>: value`
+#' @param plotly_args a list with the following named values:
+#'   \itemize{
+#'     \item{`add_vars`}{an optional
+#'       list with additional data that should be added to the [plotly]
+#'       tooltip. If named, the names are the labels in the tooltip. If unnamed, 
+#'       the tooltip labels from `labelVars` are used instead. The list values 
+#'       are the columns in `data` where the values will be pulled from; default 
+#'       is `NULL`} 
+#'     \item{`margin`}{a named list of numeric values specifying the plot
+#'       margins, names should be `l` (left), `r` (right), `b` (bottom),
+#'       `t` (top), and `pad` (padding); default is
+#'       `list(l = 50, r = 50, b = 100, t = 50, pad = 4)`. This argument can be
+#'       adjusted along with `caption_y_shift` to adjust the caption vertical 
+#'       position in relationship to the plotting area.}
+#'     \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
+#'       vertical position of the caption. This values works with `margin` 
+#'       argument, specifically the bottom margin. Default is `-0.012`.} 
+#'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
+#'       should be scaled. If `'neg'`, only the negative values are scaled, if 
+#'       `'pos'` only the positive values are scaled, if `'both'` the positive 
+#'       and negative values are scaled. Default is `NULL`, in which case the 
+#'       default [plotly] x-axis scale is used.}
+#'   }
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams clinUtils::formatVarForPlotLabel
@@ -69,7 +89,18 @@ subjectProfileIntervalPlot <- function(
 	formatReport = subjectProfileReportFormat(),
 	paging = TRUE,
 	plotly = FALSE,
-	plotly_hover_text = NULL){
+	plotly_args = list(
+	  margin = list(
+	    l = 50,
+	    r = 50,
+	    b = 100,
+	    t = 50,
+	    pad = 4
+	  ),
+	  caption_y_shift = -0.12,
+	  log_x_axis = NULL,
+	  add_vars = NULL
+	)){
 
 	timeImpType <- match.arg(timeImpType)
 	
@@ -167,274 +198,208 @@ subjectProfileIntervalPlot <- function(
 	  
 		subject <- unique(dataSubject[, subjectVar])
 		
-		# split plot into multiple page(s)
-		dataSubject <- getPageVar(
-			data = dataSubject, 
-			var = "yVar", typeVar = "y",
-			formatReport = formatReport,
-			title = !is.null(title),
-			xLab = !is.null(xLab),
-			caption = TRUE,
-			paging = paging
-		)
-		
-		if (plotly == TRUE) {
-		  color_scale <- levels(dataSubject[[colorVar]])
-		  shape_scale <- c("Complete" = "square", "Missing end" = "triangle-right", "Missing start" = "triangle-left")
-		}
-		
-		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
+		if (plotly) {
 		  
-		  if (plotly == TRUE) {
-		    
-		    dataSubject[[paramVar]] <- forcats::fct_rev(factor(dataSubject[[paramVar]]))
-		    
-		    p <- plotly::plot_ly(
-		      color = dataSubject[[colorVar]]
-		    )
-		    
-		    # We're going to plot each colorVar sequentially, and within it, plot
-		    # start/end points + segments, that way we can control all three with "MILD" click
-		    
-		    for (colour in levels(dataSubject[[colorVar]])) {
-		      dat <- dataSubject[!is.na(dataSubject[[colorVar]]) & dataSubject[[colorVar]] == colour,]
-		      
-		      # Plot the start points
-		      for (category in unique(dat[[timeStartShapeVar]])) {
-		        
-		        if (!is.na(category)) {
-		          
-		          start_dat <- dat[!is.na(dat[[timeStartShapeVar]]) & dat[[timeStartShapeVar]] == category,]
-		          
-		          hover_texts <- apply(start_dat, 1, generate_plotly_hover_text, 
-		                               timeStartVar, paramVar, colorVar, 
-		                               timeStartShapeVar, plotly_hover_text)
-		          
-		          start_dat$hover_texts <- unname(hover_texts)
-		          
-		          p <- p |>
-		            plotly::add_trace(
-		              x = start_dat[[timeStartVar]],
-		              y = start_dat[[paramVar]],
-		              color = sapply(start_dat[[colorVar]], function(x) color_scale[[x]]),
-		              type = 'scatter',
-		              mode = 'markers',
-		              # If not complete, it's missing start
-		              marker = list(symbol = shape_scale[[category]],
-		                            size = 10),
-		              showlegend = TRUE,
-		              legendgroup = colour, # This is necessary to control multiple traces with one legend.
-		              text = start_dat[["hover_texts"]],
-		              hoverinfo = "text"
-		            )
-		        }
-		      }
-		      
-		      # Plot the end points
-		      for (category in unique(dat[[timeEndShapeVar]])) {
-		        if (!is.na(category)) {
-		          
-		          end_dat <- dat[!is.na(dat[[timeEndShapeVar]]) & dat[[timeEndShapeVar]] == category,]
-		          
-		          hover_texts <- apply(end_dat, 1, generate_plotly_hover_text, 
-		                               timeEndVar, paramVar, colorVar, 
-		                               timeEndShapeVar, plotly_hover_text)
-		          
-		          end_dat$hover_texts <- unname(hover_texts)
-		          
-		          p <- p |>
-		            plotly::add_trace(
-		              x = end_dat[[timeEndVar]],
-		              y = end_dat[[paramVar]],
-		              color = sapply(end_dat[[colorVar]], function(x) color_scale[[x]]),
-		              type = 'scatter',
-		              mode = 'markers',
-		              # If not complete, it's missing end
-		              marker = list(symbol = shape_scale[[category]],
-		                            size = 10),
-		              showlegend = FALSE,
-		              legendgroup = colour,
-		              text = end_dat[["hover_texts"]],
-		              hoverinfo = "text"
-		            )
-		        }
-		      }
-		      
-		      # Plot the connecting lines
-		      segment_df <- dat[!is.na(dat$missingStartPlot) & !is.na(dat$missingEndPlot), ]
-		      
-		      if (nrow(segment_df) > 0) {
-		        p <- p |>
-		          plotly::add_segments(
-		            x = segment_df[[timeStartVar]],
-		            xend = segment_df[[timeEndVar]],
-		            y = segment_df[[paramVar]],
-		            yend = segment_df[[paramVar]],
-		            color = sapply(segment_df[[colorVar]], function(x) color_scale[[x]]),
-		            line = list(width = 2),
-		            showlegend = FALSE,
-		            legendgroup = colour
-		          )
-		      }
-		    }
-		    
-		    p <- p |>
-		      plotly::layout(
-		        title = title,
-		        xaxis = list(
-		          zeroline = FALSE,
-		          title = xLab
-		        )
-		      )
-		    
-		    p
-		  } else {
-		    aesArgs <- c(
-		      list(
-		        x = sym(timeStartVar), xend = sym(timeEndVar),
-		        y = sym("yVar"), yend = sym("yVar")
-		      ),
-		      if(!is.null(colorVar))	list(color = sym(colorVar))
-		    )
-		    
-		    # create the plot
-		    gg <- ggplot()
-		    
-		    ## plot segments
-		    
-		    # records with start/end date
-		    # and for records with missing start and/or date: plot segment to have color legend without segment
-		    # important! entire data should be defined with the first geom
-		    # and segment defined first, otherwise
-		    # order in labels of y-axis can be different between geom_point and geom_segment
-		    argsSegment <- list(
-		      mapping = do.call(aes, aesArgs), data = dataSubjectPage,
-		      show.legend = TRUE, alpha = alpha
-		    )
-		    aesLineSize <- ifelse(packageVersion("ggplot2") >= "3.4.0", "linewidth", "size")
-		    argsSegment[[aesLineSize]] <- 2
-		    gg <- gg + do.call(geom_segment, argsSegment)
-		    
-		    geomPointCustom <- function(gg, xVar, shapeVar){
-		      aesPC <- c(
-		        list(x = sym(xVar), y = sym("yVar"), shape = sym(shapeVar)),
-		        if(!is.null(colorVar))	list(color = sym(colorVar))
-		      )
-		      argsGeomPoint <- list(
-		        data = dataSubjectPage,
-		        mapping = do.call(aes, aesPC),
-		        fill = "white",
-		        size = shapeSize,
-		        position = position_nudge(y = -0.01),
-		        alpha = alpha
-		      )
-		      if(packageVersion("ggplot2") >= "3.5.0"){
-		        argsGeomPoint[["show.legend"]] <- c(
-		          shape = TRUE,
-		          if(!is.null(colorVar)) c(color = TRUE)
-		        )
-		      }
-		      gg + do.call(geom_point, argsGeomPoint)
-		    }
-		    
-		    gg <- geomPointCustom(gg, xVar = timeStartVar, shapeVar = timeStartShapeVar)
-		    gg <- geomPointCustom(gg, xVar = timeEndVar, shapeVar = timeEndShapeVar)
-		    
-		    if(!is.null(shapePalette))
-		      gg <- gg + getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")
-		    
-		    # lines are included in shape legend
-		    gg <- gg + guides(shape = guide_legend(override.aes = list(linetype = NA)))
-		    
-		    gg <- gg +
-		      scale_y_discrete(drop = TRUE) +
-		      subjectProfileTheme()
-		    
-		    if(!is.null(title))
-		      gg <- gg + ggtitle(title)
-		    
-		    if(!is.null(xLab))
-		      gg <- gg + xlab(xLab)
-		    
-		    if(!is.null(yLab))
-		      gg <- gg + ylab(yLab)
-		    
-		    if(!is.null(caption))
-		      gg <- gg + labs(caption = caption) +
-		      theme(plot.caption = element_text(hjust = 0.5))
-		    
-		    # color palette and name for color legend
-		    if(!is.null(colorVar)){
-		      gg <- gg + getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
-		        guides(color = guide_legend(override.aes = list(shape = NA)))
-		    }else	gg <- gg + scale_color_manual(values = colorPalette)
-		    
-		    # set scale only in continuous, if all missing scale is not defined as cont,
-		    # so get error: Error: Discrete value supplied to continuous scale
-		    isXScaleCont <- !all(is.na(dataSubjectPage[, c(timeStartVar, timeEndVar)]))
-		    argsScaleX <- c(
-		      if(!is.null(timeExpand))	list(expand = timeExpand),
-		      if(!is.null(timeTrans))	list(trans = timeTrans)
-		    )
-		    if(isXScaleCont && length(argsScaleX) > 0)
-		      gg <- gg + do.call("scale_x_continuous", argsScaleX)
-		    
-		    # set time limits for the x-axis
-		    # default: FALSE in case time limits are changed afterwards
-		    if(!is.null(timeLim) & timeAlign){
-		      timeLimSubject <- if(is.list(timeLimInit))	timeLimInit[[subject]]	else	timeLimInit
-		      gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
-		    }
-		    
-		    # to deal with custom shape (e.g. partial dates)
-		    # use geom_point
-		    
-		    ## extract number of lines
-		    
-		    # plot content
-		    nLines <- countNLines(unique(dataSubjectPage[, "yVar"]))
-		    nLinesPlot <- sum(nLines) + 0.8 * (length(nLines) - 1)
-		    
-		    # legend:
-		    
-		    nLinesLegend <- 0
-		    # for the color variable
-		    if(!is.null(colorVar))
-		      nLinesLegend <- getNLinesLegend(
-		        values = colorPalette,
-		        title = colorLab
-		      )
-		    if(hasShapeVar){
-		      nLinesLegend <- nLinesLegend +
-		        getNLinesLegend(
-		          values = shapePalette,
-		          title = shapeLab
-		        )
-		    }
-		    # 1 line to separate the two legends if color and shape are specified and different
-		    # (ggplot will create separate legend if the title differ)
-		    if(!is.null(colorVar) & hasShapeVar && colorLab != shapeLab){
-		      nLinesLegend <- nLinesLegend + 1
-		    }
-		    
-		    nLinesPlot <- max(nLinesPlot, nLinesLegend)
-		    
-		    # in title and axes
-		    nLinesTitleAndXAxis <- sum(c(
-		      getNLinesLabel(value = title, elName = "title"),
-		      getNLinesLabel(value = xLab, elName = "x"),
-		      getNLinesLabel(value = caption, elName = "caption")
-		    ))
-		    nLines <- nLinesPlot + nLinesTitleAndXAxis
-		    
-		    ## set attributes
-		    attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
-		    class(gg) <- c("subjectProfileEventPlot", class(gg))
-		    
-		    gg
+		  if (is.null(plotly_args$margin)) {
+		    plotly_args$margin <- list(l = 50, r = 50, b = 100, t = 50, pad = 4)
 		  }
-			
-		})
+		  if (is.null(plotly_args$caption_y_shift)) {
+		    plotly_args$caption_y_shift <- -0.12
+		  }
+		  pltly <- plotlyIntervalPlot(
+		    data = data,
+        paramVar = paramVar,
+        paramLab = paramLab,
+        timeStartVar = timeStartVar,
+        timeStartLab = timeStartLab,
+        timeEndVar = timeEndVar,
+        timeEndLab = timeEndLab,
+		    timeLim = timeLim,
+        colorVar = colorVar,
+        colorLab = colorLab,
+        colorPalette = colorPalette,
+        alpha = alpha,
+        timeStartShapeVar = timeStartShapeVar,
+        timeEndShapeVar = timeEndShapeVar,
+        shapeLab = shapeLab,
+        shapePalette = shapePalette,
+        shapeSize = shapeSize,
+        title = title,
+        xLab = xLab,
+        yLab = yLab,
+        caption = caption,
+		    labelVars = labelVars,
+        margin = plotly_args$margin,
+        caption_y_shift = plotly_args$caption_y_shift,
+        log_x_axis = plotly_args$log_x_axis,
+        add_vars = plotly_args$add_vars
+		  )
+		  
+		  ## set attributes
+		  attr(pltly, 'metaData') <- list(subjectID = subject)
+		  
+		  return(pltly)
+		  
+		} else {
+		
+  		# split plot into multiple page(s)
+  		dataSubject <- getPageVar(
+  			data = dataSubject, 
+  			var = "yVar", typeVar = "y",
+  			formatReport = formatReport,
+  			title = !is.null(title),
+  			xLab = !is.null(xLab),
+  			caption = TRUE,
+  			paging = paging
+  		)
+  		
+  		listPlots <- dlply(dataSubject, "pagePlot", function(dataSubjectPage){
+  
+  	    aesArgs <- c(
+  	      list(
+  	        x = sym(timeStartVar), xend = sym(timeEndVar),
+  	        y = sym("yVar"), yend = sym("yVar")
+  	      ),
+  	      if(!is.null(colorVar))	list(color = sym(colorVar))
+  	    )
+  	    
+  	    # create the plot
+  	    gg <- ggplot()
+  	    
+  	    ## plot segments
+  	    
+  	    # records with start/end date
+  	    # and for records with missing start and/or date: plot segment to have color legend without segment
+  	    # important! entire data should be defined with the first geom
+  	    # and segment defined first, otherwise
+  	    # order in labels of y-axis can be different between geom_point and geom_segment
+  	    argsSegment <- list(
+  	      mapping = do.call(aes, aesArgs), data = dataSubjectPage,
+  	      show.legend = TRUE, alpha = alpha
+  	    )
+  	    aesLineSize <- ifelse(packageVersion("ggplot2") >= "3.4.0", "linewidth", "size")
+  	    argsSegment[[aesLineSize]] <- 2
+  	    gg <- gg + do.call(geom_segment, argsSegment)
+  	    
+  	    geomPointCustom <- function(gg, xVar, shapeVar){
+  	      aesPC <- c(
+  	        list(x = sym(xVar), y = sym("yVar"), shape = sym(shapeVar)),
+  	        if(!is.null(colorVar))	list(color = sym(colorVar))
+  	      )
+  	      argsGeomPoint <- list(
+  	        data = dataSubjectPage,
+  	        mapping = do.call(aes, aesPC),
+  	        fill = "white",
+  	        size = shapeSize,
+  	        position = position_nudge(y = -0.01),
+  	        alpha = alpha
+  	      )
+  	      if(packageVersion("ggplot2") >= "3.5.0"){
+  	        argsGeomPoint[["show.legend"]] <- c(
+  	          shape = TRUE,
+  	          if(!is.null(colorVar)) c(color = TRUE)
+  	        )
+  	      }
+  	      gg + do.call(geom_point, argsGeomPoint)
+  	    }
+  	    
+  	    gg <- geomPointCustom(gg, xVar = timeStartVar, shapeVar = timeStartShapeVar)
+  	    gg <- geomPointCustom(gg, xVar = timeEndVar, shapeVar = timeEndShapeVar)
+  	    
+  	    if(!is.null(shapePalette))
+  	      gg <- gg + getAesScaleManual(lab = shapeLab, palette = shapePalette, type = "shape")
+  	    
+  	    # lines are included in shape legend
+  	    gg <- gg + guides(shape = guide_legend(override.aes = list(linetype = NA)))
+  	    
+  	    gg <- gg +
+  	      scale_y_discrete(drop = TRUE) +
+  	      subjectProfileTheme()
+  	    
+  	    if(!is.null(title))
+  	      gg <- gg + ggtitle(title)
+  	    
+  	    if(!is.null(xLab))
+  	      gg <- gg + xlab(xLab)
+  	    
+  	    if(!is.null(yLab))
+  	      gg <- gg + ylab(yLab)
+  	    
+  	    if(!is.null(caption))
+  	      gg <- gg + labs(caption = caption) +
+  	      theme(plot.caption = element_text(hjust = 0.5))
+  	    
+  	    # color palette and name for color legend
+  	    if(!is.null(colorVar)){
+  	      gg <- gg + getAesScaleManual(lab = colorLab, palette = colorPalette, type = "color") +
+  	        guides(color = guide_legend(override.aes = list(shape = NA)))
+  	    }else	gg <- gg + scale_color_manual(values = colorPalette)
+  	    
+  	    # set scale only in continuous, if all missing scale is not defined as cont,
+  	    # so get error: Error: Discrete value supplied to continuous scale
+  	    isXScaleCont <- !all(is.na(dataSubjectPage[, c(timeStartVar, timeEndVar)]))
+  	    argsScaleX <- c(
+  	      if(!is.null(timeExpand))	list(expand = timeExpand),
+  	      if(!is.null(timeTrans))	list(trans = timeTrans)
+  	    )
+  	    if(isXScaleCont && length(argsScaleX) > 0)
+  	      gg <- gg + do.call("scale_x_continuous", argsScaleX)
+  	    
+  	    # set time limits for the x-axis
+  	    # default: FALSE in case time limits are changed afterwards
+  	    if(!is.null(timeLim) & timeAlign){
+  	      timeLimSubject <- if(is.list(timeLimInit))	timeLimInit[[subject]]	else	timeLimInit
+  	      gg <- gg + coord_cartesian(xlim = timeLimSubject, default = TRUE)
+  	    }
+  	    
+  	    # to deal with custom shape (e.g. partial dates)
+  	    # use geom_point
+  	    
+  	    ## extract number of lines
+  	    
+  	    # plot content
+  	    nLines <- countNLines(unique(dataSubjectPage[, "yVar"]))
+  	    nLinesPlot <- sum(nLines) + 0.8 * (length(nLines) - 1)
+  	    
+  	    # legend:
+  	    
+  	    nLinesLegend <- 0
+  	    # for the color variable
+  	    if(!is.null(colorVar))
+  	      nLinesLegend <- getNLinesLegend(
+  	        values = colorPalette,
+  	        title = colorLab
+  	      )
+  	    if(hasShapeVar){
+  	      nLinesLegend <- nLinesLegend +
+  	        getNLinesLegend(
+  	          values = shapePalette,
+  	          title = shapeLab
+  	        )
+  	    }
+  	    # 1 line to separate the two legends if color and shape are specified and different
+  	    # (ggplot will create separate legend if the title differ)
+  	    if(!is.null(colorVar) & hasShapeVar && colorLab != shapeLab){
+  	      nLinesLegend <- nLinesLegend + 1
+  	    }
+  	    
+  	    nLinesPlot <- max(nLinesPlot, nLinesLegend)
+  	    
+  	    # in title and axes
+  	    nLinesTitleAndXAxis <- sum(c(
+  	      getNLinesLabel(value = title, elName = "title"),
+  	      getNLinesLabel(value = xLab, elName = "x"),
+  	      getNLinesLabel(value = caption, elName = "caption")
+  	    ))
+  	    nLines <- nLinesPlot + nLinesTitleAndXAxis
+  	    
+  	    ## set attributes
+  	    attr(gg, 'metaData') <- list(subjectID = subject, nLines = nLines)
+  	    class(gg) <- c("subjectProfileEventPlot", class(gg))
+  	    
+  	    gg
+		  })
+		}
 
 	})
 	return(listPlots)

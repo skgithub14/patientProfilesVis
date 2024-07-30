@@ -4,14 +4,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = NULL,
+    paramValueVal = 1,
+    paramValueValUnits = NULL,
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = NULL, 
-    colorVar = NULL, 
+    colorVal = NULL, 
     shapeLab = NULL, 
-    shapeVar = NULL,
+    shapeVal = NULL,
     uln = NULL,
     lln = NULL,
     add_vars = NULL
@@ -24,14 +24,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = "g/L",
+    paramValueVal = 1,
+    paramValueValUnits = "g/L",
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = NULL, 
-    colorVar = NULL, 
+    colorVal = NULL, 
     shapeLab = NULL, 
-    shapeVar = NULL,
+    shapeVal = NULL,
     uln = NULL,     
     lln = NULL,
     add_vars = NULL
@@ -44,14 +44,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = "g/L",
+    paramValueVal = 1,
+    paramValueValUnits = "g/L",
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = "Lab Category", 
-    colorVar = "Chemistry", 
+    colorVal = "Chemistry", 
     shapeLab = NULL, 
-    shapeVar = NULL,
+    shapeVal = NULL,
     uln = NULL,     
     lln = NULL,
     add_vars = NULL
@@ -64,14 +64,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = "g/L",
+    paramValueVal = 1,
+    paramValueValUnits = "g/L",
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = "Lab Category", 
-    colorVar = "Chemistry", 
+    colorVal = "Chemistry", 
     shapeLab = "Range Indicator", 
-    shapeVar = "NORMAL",
+    shapeVal = "NORMAL",
     uln = NULL,     
     lln = NULL,
     add_vars = NULL
@@ -84,14 +84,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = "g/L",
+    paramValueVal = 1,
+    paramValueValUnits = "g/L",
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = "Lab Category", 
-    colorVar = "Chemistry", 
+    colorVal = "Chemistry", 
     shapeLab = "Range Indicator", 
-    shapeVar = "NORMAL",
+    shapeVal = "NORMAL",
     lln = 0,
     uln = 2,
     add_vars = NULL
@@ -104,14 +104,14 @@ test_that("linePlotHoverTemplate() create correct one hover template string with
   
   out <- linePlotHoverTemplate(
     title = "Albumin", 
-    paramValueVar = 1,
-    paramValueVarUnits = "g/L",
+    paramValueVal = 1,
+    paramValueValUnits = "g/L",
     timeLab = "Study Day", 
-    timeVar = 2,
+    timeVal = 2,
     colorLab = "Lab Category", 
-    colorVar = "Chemistry", 
+    colorVal = "Chemistry", 
     shapeLab = "Range Indicator", 
-    shapeVar = "NORMAL",
+    shapeVal = "NORMAL",
     lln = 0,
     uln = 2,
     add_vars = list(Date = "2020-01-01", 
@@ -140,9 +140,9 @@ test_that("linePlotHoverTemplate() can be vectorized using dplyr::mutate()", {
     data,
     hovertemplate = linePlotHoverTemplate(
       title = param,
-      paramValueVar = aval,
+      paramValueVal = aval,
       timeLab = "Study Day",
-      timeVar = ady
+      timeVal = ady
     )
   )
   
@@ -166,10 +166,10 @@ test_that("linePlotHoverTemplate() can be vectorized using dplyr::mutate()", {
     data,
     hovertemplate = linePlotHoverTemplate(
       title = param,
-      paramValueVar = aval,
-      paramValueVarUnits = avalu,
+      paramValueVal = aval,
+      paramValueValUnits = avalu,
       timeLab = "Study Day",
-      timeVar = ady
+      timeVal = ady
     )
   )
   
@@ -197,14 +197,14 @@ test_that("linePlotHoverTemplate() can be vectorized using dplyr::mutate()", {
     data,
     hovertemplate = linePlotHoverTemplate(
       title = param,
-      paramValueVar = aval,
-      paramValueVarUnits = avalu,
+      paramValueVal = aval,
+      paramValueValUnits = avalu,
       timeLab = "Study Day",
-      timeVar = ady,
+      timeVal = ady,
       colorLab = "Lab Category",
-      colorVar = lbcat,
+      colorVal = lbcat,
       shapeLab = "Range Indicator",
-      shapeVar = anrind
+      shapeVal = anrind
     )
   )
   
@@ -231,9 +231,9 @@ test_that("linePlotHoverTemplate() can be vectorized using dplyr::mutate()", {
     data,
     hovertemplate = linePlotHoverTemplate(
       title = param,
-      paramValueVar = aval,
+      paramValueVal = aval,
       timeLab = "Study Day",
-      timeVar = ady,
+      timeVal = ady,
       uln = !!rlang::sym(paramValueRangeVar[1]),
       lln = !!rlang::sym(paramValueRangeVar[2])
     )
@@ -269,9 +269,9 @@ test_that("linePlotHoverTemplate() can be vectorized using dplyr::mutate()", {
     data,
     hovertemplate = linePlotHoverTemplate(
       title = param,
-      paramValueVar = aval,
+      paramValueVal = aval,
       timeLab = "Study Day",
-      timeVar = ady,
+      timeVal = ady,
       add_vars = add_vars
     )
   )
@@ -296,6 +296,7 @@ test_that("plotlyLinePlot() generates a line plot", {
   ## data prep
   data("dataSDTMCDISCP01", package = "clinUtils")
   dataSDTM <- dataSDTMCDISCP01
+  labelVarsSDTM <- attr(dataSDTM, "labelVars")
   dataLB <- dataSDTM$LB
   dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
   subjectLB <- "01-704-1445"
@@ -312,6 +313,12 @@ test_that("plotlyLinePlot() generates a line plot", {
   data[, "paramFacetVar"] <- interactionWithMissing(data = data, 
                                                     vars = paramNameVar, 
                                                     varSep = paramVarSep)
+  data[, "paramFacetVar"] <- clinUtils::formatVarForPlotLabel(
+    data = data, 
+    paramVar = "paramFacetVar", 
+    paramGroupVar = NULL,
+    width = 30
+  )
   
   # plot with all elements
   plotlyLinePlot(
@@ -330,15 +337,44 @@ test_that("plotlyLinePlot() generates a line plot", {
     shapeSize = 7,
     timeVar = "LBDY",
     timeLab = "Study Day",
+    timeLim = NULL,
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
     add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    )
+    ),
+    labelVars = labelVarsSDTM
   )
   
-  # plot without units
+  # plot with time limits
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = colorVar,
+    colorLab = "Lab Category",
+    colorPalette = colorPalette,
+    alpha = 1,
+    shapeVar = shapeVar,
+    shapeLab = "Normal Range Indicator",
+    shapePalette = shapePalette,
+    shapeSize = 7,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    timeLim = c(0, 60),
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    add_vars = list(
+      Date = "LBDTC",
+      `Range Indicator` = "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
+  )
+  
+  # plot without units, no missing names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -360,10 +396,11 @@ test_that("plotlyLinePlot() generates a line plot", {
     add_vars = list(
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
-    )
+    ),
+    labelVars = NULL
   )
   
-  # plot without colors
+  # plot without colors, some missing names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -384,11 +421,12 @@ test_that("plotlyLinePlot() generates a line plot", {
     xLab = "Study Day",
     add_vars = list(
       Date = "LBDTC",
-      `Range Indicator` = "LBNRIND"
-    )
+      "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
   )
   
-  # plot without shapes
+  # plot without shapes, no names in add_vars
   plotlyLinePlot(
     data = data,
     paramValueVar = paramValueVar,
@@ -408,9 +446,10 @@ test_that("plotlyLinePlot() generates a line plot", {
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
     add_vars = list(
-      Date = "LBDTC",
-      `Range Indicator` = "LBNRIND"
-    )
+      "LBDTC",
+      "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
   )
   
   # plot without colors or shapes
@@ -422,7 +461,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     colorValueRange = "lightgreen",
     colorVar = NULL,
     colorLab = NULL,
-    colorPalette = NULL,
+    colorPalette = getColorPalettePatientProfile(n = 1),
     alpha = 1,
     shapeVar = NULL,
     shapeLab = NULL,
@@ -507,6 +546,12 @@ test_that("plotlyLinePlot() can log the x-axis and include footnote", {
   data[, "paramFacetVar"] <- interactionWithMissing(data = data, 
                                                     vars = paramNameVar, 
                                                     varSep = paramVarSep)
+  data[, "paramFacetVar"] <- clinUtils::formatVarForPlotLabel(
+    data = data, 
+    paramVar = "paramFacetVar", 
+    paramGroupVar = NULL,
+    width = 30
+  )
   
   # exaggerate negative values
   data <- dplyr::mutate(

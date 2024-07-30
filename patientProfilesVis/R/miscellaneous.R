@@ -814,42 +814,36 @@ formatTimeLim <- function(data, subjectVar = "USUBJID",
 	
 }
 
-#' Generate text to include in plotly hover
-#' @param dat A row of dataframe
-#' @param timeVar A string, that determines time mapping
-#' @param paramVar A string, that determines param mapping
-#' @param colorVar A string, that determines color mapping
-#' @param timeShapeVar A string that determines shape mapping
-#' @param plotly_hover_text A named vector. If not null, 
-#' `generate_extra_plotly_hover_text` will be called to create extra info.
-generate_plotly_hover_text <- function(dat, timeVar, paramVar, colorVar, 
-                                       timeShapeVar, plotly_hover_text = NULL) {
-  base_text <- paste0(
-    '<b>', timeVar, '</b>: ', dat[[timeVar]], '<br>',
-    '<b>', paramVar, '</b>: ', dat[[paramVar]], '<br>',
-    '<b>', colorVar, '</b>: ', dat[[colorVar]], '<br>',
-    '<b>Status</b>: ', dat[[timeShapeVar]], '<br>'
-  )
-  
-  extra_text <- if (!is.null(plotly_hover_text)) {
-    generate_extra_plotly_hover_text(plotly_hover_text, dat)
-  } else {
-    ""
-  }
-  return(paste0(base_text, extra_text, "<br>"))
-}
 
-#' Generate extra text to include in plotly hover
-#' @param plotly_hover_text Named vector. Plotly hover will include
-#' this information, in form of `<b>Name</b>: value`
-#' @param dat Data frame, where column `value` will be pulled to make the text
-generate_extra_plotly_hover_text <- function(plotly_hover_text, dat) {
-  text_list <- mapply(function(name, value) {
-    paste0("<b>", name, "</b>: ", dat[[value]])
-  }, names(plotly_hover_text), plotly_hover_text)
+#' Format list of additional hover template variables for [plotly] chart
+#'
+#' @param data a data frame with the plotting data
+#' @param add_vars a list of column names in `data` to add to the hover
+#'   template. If some or all elements are unnamed, labels will be taken from
+#'   `labelVars`.
+#' @inheritParams patientProfilesVis-common-args
+#'
+#' @returns a named list
+#' 
+formatAdditionalPlotlyHoverVars <- function(data, add_vars, labelVars) {
   
-  collapsed <- paste(text_list, collapse = "<br>")
-  res <- paste0(collapsed, "<br>")
+  # get additional variable labels if not specified
+  if (is.null(names(add_vars))) {
+    add_var_names <- purrr::map(add_vars, \(x) labelVars[[x]][1])
+    names(add_vars) <- add_var_names
+  } else if (any(names(add_vars) == "")) {
+    add_var_names <- purrr::imap(add_vars, \(x, y) {
+      if (y == "") {
+        return(labelVars[[x]][1])
+      } else {
+        return(y)
+      }
+    })
+    names(add_vars) <- add_var_names
+  }
   
-  return(res)
+  # get additional variable values for use with linePlotHoverTemplate()
+  add_vars <- purrr::map(add_vars, \(x) data[[x]])
+  
+  return(add_vars)
 }

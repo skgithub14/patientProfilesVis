@@ -126,3 +126,100 @@ getTimeTrans <- function(
  	return(transf)
 
 }
+
+
+#' Log x-axis variables in the data
+#' 
+#' Provided column name(s) in a data frame, this function creates a logged 
+#' version of those column(s) in the same data frame. The new variables in the 
+#' data frame are named the same as the old one with `"Log"` appended to the 
+#' end of their names. You can apply the log function to the entire x-axis, only
+#' the negative values, or only the positive values. Logging the negative values 
+#' is often useful for plots of medical history where a few items have extreme 
+#' negative x-axis values which results in compression of the positive x-axis 
+#' values, when the positive x-axis values may be of more interest.
+#'
+#' @param data a data frame
+#' @param xvars a character vector, the column names in `data` that contain the
+#'   x-axis values
+#' @param log_x_axis a string, indicating how the x-axis variable should be
+#'   scaled. If `'neg'`, only the negative values are scaled, if `'pos'` only
+#'   the positive values are scaled, if `'both'` the positive and negative
+#'   values are scaled.
+#'
+#' @return a named list: \itemize{
+#'   \item{`data`}{The modified data frame with new variable(s)}
+#'   \item{`footnote`}{A string, a footnote that can be added to the caption 
+#'     that describes how the x-axis was logged and which states that the 
+#'     tooltip x-axis values is not the logged values but rather the original 
+#'     value}
+#' }
+#'
+logPlotlyXAxis <- function(data, xvars, log_x_axis) {
+  
+  if (!log_x_axis %in% c("pos", "neg", "both")) {
+    stop("log_x_axis must be either 'pos', 'neg', or 'both'")
+  }
+  
+  # modify the data, iterate through the x variables
+  for (xvar in xvars) {
+    if (log_x_axis == "pos") {
+      data <- dplyr::mutate(
+        data,
+        dplyr::across(
+          c(!!rlang::sym(xvar)),
+          ~ dplyr::if_else(. > 0, log(abs(.)), .),
+          .names = "{xvar}Log"
+        )
+      )
+    } else if (log_x_axis == "neg") {
+      data <- dplyr::mutate(
+        data,
+        dplyr::across(
+          c(!!rlang::sym(xvar)),
+          ~ dplyr::if_else(. < 0, -1 * log(abs(.)), .),
+          .names = "{xvar}Log"
+        )
+      )
+    } else {
+      data <- dplyr::mutate(
+        data,
+        dplyr::across(
+          c(!!rlang::sym(xvar)),
+          ~ dplyr::case_when(
+            . > 0 ~ log(abs(.)),
+            . < 0 ~ -1 * log(abs(.)),
+            TRUE ~ .
+          ),
+          .names = "{xvar}Log"
+        )
+      )
+    }
+  }
+  
+  # get footnote
+  if (log_x_axis == "pos") {
+    footnote <- paste(
+      "Note: positive x-axis", 
+      "values are plotted on a log scale; however", 
+      "values in tooltip reflect actual data."
+    )
+  } else if (log_x_axis == "neg") {
+    footnote <- paste(
+      "Note: negative x-axis", 
+      "values are plotted on a log scale; however", 
+      "values in tooltip reflect actual data."
+    )
+  } else {
+    footnote <- paste(
+      "Note: x-axis", 
+      "values are plotted on a log scale; however", 
+      "values in tooltip reflect actual data."
+    )
+  }
+  
+  return(
+    list(data = data,
+         footnote = footnote)
+  )
+}
