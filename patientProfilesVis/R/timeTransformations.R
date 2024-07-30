@@ -169,7 +169,7 @@ logPlotlyXAxis <- function(data, xvars, log_x_axis) {
         dplyr::across(
           c(!!rlang::sym(xvar)),
           ~ dplyr::if_else(. > 0, log(abs(.)), .),
-          .names = "{.col}Log"
+          .names = "{xvar}Log"
         )
       )
     } else if (log_x_axis == "neg") {
@@ -178,7 +178,7 @@ logPlotlyXAxis <- function(data, xvars, log_x_axis) {
         dplyr::across(
           c(!!rlang::sym(xvar)),
           ~ dplyr::if_else(. < 0, -1 * log(abs(.)), .),
-          .names = "{.col}Log"
+          .names = "{xvar}Log"
         )
       )
     } else {
@@ -191,7 +191,7 @@ logPlotlyXAxis <- function(data, xvars, log_x_axis) {
             . < 0 ~ -1 * log(abs(.)),
             TRUE ~ .
           ),
-          .names = "{.col}Log"
+          .names = "{xvar}Log"
         )
       )
     }

@@ -22,20 +22,21 @@ plotlyIntervalPlot <- function(data,
                                timeStartLab,
                                timeEndVar,
                                timeEndLab,
-                               colorVar,
-                               colorLab,
-                               colorPalette,
-                               alpha,
+                               timeLim = NULL,
+                               colorVar = NULL,
+                               colorLab = NULL,
+                               colorPalette = getColorPalettePatientProfile(n = 1),
+                               alpha = 1,
                                timeStartShapeVar,
                                timeEndShapeVar,
                                shapeLab,
-                               shapePalette,
+                               shapePalette = getShapePalettePatientProfile(n = 1),
                                shapeSize,
                                title,
                                xLab,
                                yLab,
-                               caption,
-                               labelVars,
+                               caption = NULL,
+                               labelVars = NULL,
                                margin = list(
                                  l = 50,
                                  r = 50,
@@ -53,7 +54,11 @@ plotlyIntervalPlot <- function(data,
                              xvars = c(timeStartVar, timeEndVar), 
                              log_x_axis = log_x_axis)
     data <- logOut$data
-    caption <- paste0(caption, "<br>", logOut$footnote)
+    caption <- if (!is.null(caption)) {
+      paste0(caption, "<br>", logOut$footnote)
+    } else {
+      logOut$footnote
+    }
   }
   
   # convert shape unicode and ggplot symbols to plotly symbol names
@@ -207,9 +212,17 @@ plotlyIntervalPlot <- function(data,
   p <- p |>
     plotly::layout(
       title = title,
-      xaxis = list(
-        title = xLab
-      ),
+      xaxis = if (is.null(timeLim)) {
+        list(
+          title = xLab
+        )
+      } else {
+        list(
+          title = xLab,
+          range = timeLim,
+          constrain = "domain"
+        )
+      },
       yaxis = list(
         title = yLab
       ),

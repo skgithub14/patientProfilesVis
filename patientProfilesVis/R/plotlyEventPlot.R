@@ -17,16 +17,16 @@
 #'
 plotlyEventPlot <- function(data,
                             paramLab,
-                            colorVar, 
-                            colorLab,
-                            colorPalette,
-                            shapeVar, 
-                            shapeLab,
-                            shapePalette,
-                            alpha,
+                            colorVar = NULL, 
+                            colorLab = NULL,
+                            colorPalette = getColorPalettePatientProfile(n = 1),
+                            shapeVar = NULL, 
+                            shapeLab = NULL,
+                            shapePalette = NULL,
+                            alpha = 1,
                             timeVar, 
                             timeLab,
-                            # timeLim = NULL,
+                            timeLim = NULL,
                             xLab,
                             yLab,
                             title,
@@ -157,10 +157,18 @@ plotlyEventPlot <- function(data,
   p <- p |>
     plotly::layout(
       title = title,
-      xaxis = list(
-        title = xLab
-      ),
-      xaxis = list(
+      xaxis = if (is.null(timeLim)) {
+        list(
+          title = xLab
+        )
+      } else {
+        list(
+          title = xLab,
+          range = timeLim,
+          constrain = "domain"
+        )
+      },
+      yaxis = list(
         title = yLab
       ),
       legend = list(

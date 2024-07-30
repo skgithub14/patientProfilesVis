@@ -214,6 +214,7 @@ subjectProfileIntervalPlot <- function(
         timeStartLab = timeStartLab,
         timeEndVar = timeEndVar,
         timeEndLab = timeEndLab,
+		    timeLim = timeLim,
         colorVar = colorVar,
         colorLab = colorLab,
         colorPalette = colorPalette,

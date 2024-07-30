@@ -35,9 +35,10 @@ plotlyLinePlot <- function(data,
                            shapeSize = 7,
                            timeVar,
                            timeLab,
+                           timeLim = NULL,
                            title,
                            xLab,
-                           labelVars,
+                           labelVars = NULL,
                            add_vars = NULL,
                            margin = list(
                              l = 250,
@@ -59,7 +60,9 @@ plotlyLinePlot <- function(data,
                              xvars = timeVar, 
                              log_x_axis = log_x_axis)
     data <- logOut$data
-    caption <- paste0(caption, "<br>", logOut$footnote)
+    caption <- logOut$footnote
+  } else {
+    caption <- NULL
   }
   
   # create tool tip column in data
@@ -140,7 +143,7 @@ plotlyLinePlot <- function(data,
         if (!is.null(log_x_axis)) {
           plotly::plot_ly(
             .,
-            x = ~timeVarLog,
+            x = ~.data[[paste0(timeVar, "Log")]],
             y = ~yVar
           )
         } else {
@@ -222,9 +225,17 @@ plotlyLinePlot <- function(data,
         } %>%
         plotly::layout(
           title = title,
-          xaxis = list(
-            title = xLab
-          ),
+          xaxis = if (is.null(timeLim)) {
+            list(
+              title = xLab
+            )
+          } else {
+            list(
+              title = xLab,
+              range = timeLim,
+              constrain = "domain"
+            )
+          },
           yaxis = list(
             title = NA
           ),
@@ -317,7 +328,7 @@ plotlyLinePlot <- function(data,
   if (!is.null(log_x_axis)) {
     plots <- plotly::add_annotations(
       plots,
-      text = footnote,
+      text = caption,
       xref = "paper",
       yref = "paper",
       x = 0,

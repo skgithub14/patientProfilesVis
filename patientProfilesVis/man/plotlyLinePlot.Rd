@@ -20,9 +20,10 @@ plotlyLinePlot(
   shapeSize = 7,
   timeVar,
   timeLab,
+  timeLim = NULL,
   title,
   xLab,
-  labelVars,
+  labelVars = NULL,
   add_vars = NULL,
   margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4),
   yaxis_title_shift = -0.035,
@@ -99,6 +100,12 @@ Records with missing time are not displayed in the plot.}
 This is used in the message
 indicating missing values for \code{timeVar},
 and for the default label of the x-axis.}
+
+\item{timeLim}{(optional) Vector of length 2 with time limits (x-axis).
+If not specified, these are extracted from the minimum \code{timeStartVar} 
+and maximum \code{timeEndVar} per subject.\cr
+The time limits are stored as attributes of the plots,
+used to align the plots in the final report.}
 
 \item{title}{String, title for the plot.}
 

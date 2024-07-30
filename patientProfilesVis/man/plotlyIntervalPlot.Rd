@@ -12,20 +12,21 @@ plotlyIntervalPlot(
   timeStartLab,
   timeEndVar,
   timeEndLab,
-  colorVar,
-  colorLab,
-  colorPalette,
-  alpha,
+  timeLim = NULL,
+  colorVar = NULL,
+  colorLab = NULL,
+  colorPalette = getColorPalettePatientProfile(n = 1),
+  alpha = 1,
   timeStartShapeVar,
   timeEndShapeVar,
   shapeLab,
-  shapePalette,
+  shapePalette = getShapePalettePatientProfile(n = 1),
   shapeSize,
   title,
   xLab,
   yLab,
-  caption,
-  labelVars,
+  caption = NULL,
+  labelVars = NULL,
   margin = list(l = 50, r = 50, b = 100, t = 50, pad = 4),
   caption_y_shift = -0.12,
   log_x_axis = NULL,
@@ -53,6 +54,12 @@ with end of time interval.}
 
 \item{timeEndLab}{String, label for \code{timeEndVar},
 displayed in a message and in the plot caption.}
+
+\item{timeLim}{(optional) Vector of length 2 with time limits (x-axis).
+If not specified, these are extracted from the minimum \code{timeStartVar} 
+and maximum \code{timeEndVar} per subject.\cr
+The time limits are stored as attributes of the plots,
+used to align the plots in the final report.}
 
 \item{colorVar}{String, variable of \code{data} with color.}
 

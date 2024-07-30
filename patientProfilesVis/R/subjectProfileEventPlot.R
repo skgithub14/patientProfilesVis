@@ -178,7 +178,7 @@ subjectProfileEventPlot <- function(
         alpha = alpha,
         timeVar = timeVar, 
         timeLab = timeLab,
-        # timeLim = NULL,
+        timeLim = timeLim,
         xLab = xLab,
         yLab = yLab,
         title = title,

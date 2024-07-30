@@ -277,6 +277,7 @@ subjectProfileLinePlot <- function(
         shapeSize = shapeSize,
         timeVar = timeVar,
         timeLab = timeLab,
+	      timeLim = timeLim,
         title = title,
         xLab = xLab,
 	      labelVars = labelVars,

@@ -15,7 +15,7 @@ test_that("intervalPlotHoverTemplate() returns correct string", {
   
   expect_equal(
     out,
-    "<b>Lethargy:</b><br><b>AE Term</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><extra></extra>"
+    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><extra></extra>"
   )
   
   # with color
@@ -33,7 +33,7 @@ test_that("intervalPlotHoverTemplate() returns correct string", {
   
   expect_equal(
     out,
-    "<b>Lethargy:</b><br><b>AE Term</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Severity</i>: Serious<br><extra></extra>"
+    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Severity</i>: Serious<br><extra></extra>"
   )
   
   # with additional variables
@@ -54,7 +54,7 @@ test_that("intervalPlotHoverTemplate() returns correct string", {
   
   expect_equal(
     out,
-    "<b>Lethargy:</b><br><b>AE Term</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Serious</i>: Y<br><i>DECOD</i>: LETHARGY<br><extra></extra>"
+    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Serious</i>: Y<br><i>DECOD</i>: LETHARGY<br><extra></extra>"
   )
 })
 

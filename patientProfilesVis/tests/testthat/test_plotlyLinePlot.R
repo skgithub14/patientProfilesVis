@@ -337,6 +337,34 @@ test_that("plotlyLinePlot() generates a line plot", {
     shapeSize = 7,
     timeVar = "LBDY",
     timeLab = "Study Day",
+    timeLim = NULL,
+    title = "Laboratory test measurements: actual value",
+    xLab = "Study Day",
+    add_vars = list(
+      Date = "LBDTC",
+      `Range Indicator` = "LBNRIND"
+    ),
+    labelVars = labelVarsSDTM
+  )
+  
+  # plot with time limits
+  plotlyLinePlot(
+    data = data,
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = "LBSTRESU",
+    paramValueRangeVar = c("LBSTNRLO", "LBSTNRHI"),
+    colorValueRange = "lightgreen",
+    colorVar = colorVar,
+    colorLab = "Lab Category",
+    colorPalette = colorPalette,
+    alpha = 1,
+    shapeVar = shapeVar,
+    shapeLab = "Normal Range Indicator",
+    shapePalette = shapePalette,
+    shapeSize = 7,
+    timeVar = "LBDY",
+    timeLab = "Study Day",
+    timeLim = c(0, 60),
     title = "Laboratory test measurements: actual value",
     xLab = "Study Day",
     add_vars = list(
@@ -369,7 +397,7 @@ test_that("plotlyLinePlot() generates a line plot", {
       Date = "LBDTC",
       `Range Indicator` = "LBNRIND"
     ),
-    labelVars = 
+    labelVars = NULL
   )
   
   # plot without colors, some missing names in add_vars
