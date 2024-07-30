@@ -25,9 +25,8 @@ plotlyLinePlot(
   xLab,
   labelVars = NULL,
   add_vars = NULL,
-  margin = list(l = 250, r = 250, b = 75, t = 50, pad = 4),
+  margin = list(l = 250, r = 50, b = 75, t = 50, pad = 4),
   yaxis_title_shift = -0.035,
-  legend_x_shift = 1.2,
   showspikes = TRUE,
   spikecolor = "red",
   log_x_axis = NULL,
@@ -129,8 +128,6 @@ used to align the plots in the final report.}
 
 \item{log_footnote_y_shift}{see [subjectProfileLinePlot()] argument
 `plotly_args`}
-
-\item{legend_y_shift}{see [subjectProfileLinePlot()] argument `plotly_args`}
 }
 \value{
 a [plotly] object

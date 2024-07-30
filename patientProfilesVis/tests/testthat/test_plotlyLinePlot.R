@@ -461,7 +461,7 @@ test_that("plotlyLinePlot() generates a line plot", {
     colorValueRange = "lightgreen",
     colorVar = NULL,
     colorLab = NULL,
-    colorPalette = NULL,
+    colorPalette = getColorPalettePatientProfile(n = 1),
     alpha = 1,
     shapeVar = NULL,
     shapeLab = NULL,

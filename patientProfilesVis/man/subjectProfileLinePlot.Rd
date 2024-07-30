@@ -47,9 +47,8 @@ subjectProfileLinePlot(
   shapeSize = rel(1),
   plotly = FALSE,
   plotly_args = list(paramValueVarUnits = NULL, add_vars = NULL, margin = list(l = 250, r
-    = 250, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035, legend_x_shift = 1.2,
-    showspikes = TRUE, spikecolor = "red", log_x_axis = NULL, log_footnote_y_shift =
-    -0.1)
+    = 50, b = 75, t = 50, pad = 4), yaxis_title_shift = -0.035, showspikes = TRUE,
+    spikecolor = "red", log_x_axis = NULL, log_footnote_y_shift = -0.1)
 )
 }
 \arguments{
@@ -237,16 +236,13 @@ recommend setting this value to `7` or higher.}
   \item{`margin`}{a named list of numeric values specifying the plot 
     margins, names should be `l` (left), `r` (right), `b` (bottom), 
     `t` (top), and `pad` (padding); default is 
-    `list(l = 250, r = 250, b = 75, t = 50, pad = 4)`. This argument can be 
-    adjusted along with `yaxis_title_shift` and/or `legend_x_shift` to 
-    adjust the y-axis title location and legend positions, respectively, in 
+    `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This argument can be 
+    adjusted along with `yaxis_title_shift` to 
+    adjust the y-axis title location in 
     relationship to the plotting area.}
   \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
     y-axis title offset. This values works with `margin` argument, 
     specifically the left margin. Default is `-0.035`.} 
-  \item{`legend_x_shift`}{a numeric value (typically a decimal > 1), 
-    adjusts legend x position. This values works with `margin` argument, 
-    specifically the right margin. Default is `1.2`.} 
   \item{`showspikes`}{a logical value, whether x-axis spikeline should be
     displayed; default is `TRUE`}
   \item{`spikecolor`}{a string, the spike line color; default is `'red'`, 

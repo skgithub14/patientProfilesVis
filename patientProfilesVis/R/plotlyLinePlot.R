@@ -10,7 +10,6 @@
 #' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param yaxis_title_shift see [subjectProfileLinePlot()] argument
 #'   `plotly_args`
-#' @param legend_y_shift see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param showspikes see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
 #' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
@@ -42,13 +41,12 @@ plotlyLinePlot <- function(data,
                            add_vars = NULL,
                            margin = list(
                              l = 250,
-                             r = 250,
+                             r = 50,
                              b = 75,
                              t = 50,
                              pad = 4
                            ),
                            yaxis_title_shift = -0.035,
-                           legend_x_shift = 1.2,
                            showspikes = TRUE,
                            spikecolor = 'red',
                            log_x_axis = NULL,
@@ -123,14 +121,12 @@ plotlyLinePlot <- function(data,
   
   # convert symbols
   if (!is.null(shapeVar)) {
-    
-    # shapes used on plot
     shapePalettePlotly <- convert_shapes_to_plotly_symbols(
       shapes = shapePalette
     )
-    
-    # shapes used on legend
-    shapePaletteUnicode <- convert_ggplot_shapes_to_unicode(
+  } else {
+    shapePalette <- getShapePalettePatientProfile(n = 1)
+    shapePalettePlotly <- convert_shapes_to_plotly_symbols(
       shapes = shapePalette
     )
   }
@@ -141,119 +137,167 @@ plotlyLinePlot <- function(data,
     plotly::do(
       p = {
         if (!is.null(log_x_axis)) {
-          plotly::plot_ly(
+          p <- plotly::plot_ly(
             .,
             x = ~.data[[paste0(timeVar, "Log")]],
             y = ~yVar
           )
         } else {
-          plotly::plot_ly(
+          p <- plotly::plot_ly(
             .,
             x = ~.data[[timeVar]],
             y = ~yVar
           )
         }
-      } %>%
-        {
-          if (!is.null(shapeVar)) {
-            plotly::add_trace(
-              .,
-              type = "scatter",
-              mode = "markers",
-              symbol = ~shapeVar,
-              symbols = shapePalettePlotly,
-              marker = list(
-                color = if (!is.null(colorVar)) {
-                  colorPalette[
-                    which(names(colorPalette) == unique(.data[[colorVar]]))
-                  ]
-                } else {
-                  colorPalette # variable is never NULL in subjectProfileLinePlot
-                },
-                size = shapeSize,
-                opacity = alpha
-              ),
-              showlegend = FALSE,
-              hovertemplate = .data$hovertemplate
-            )
+      
+        # plot each color so colors can be filtered using the legend
+        for (color_num in seq_along(colorPalette)) {
+          color <- colorPalette[[color_num]]
+          color_val <- names(colorPalette)[color_num]
+          
+          # subset data for this color
+          if (length(colorPalette) == 1) {
+            color_dat <- .data
           } else {
-            plotly::add_trace(
-              .,
-              type = "scatter",
-              mode = "markers",
-              marker = list(
-                color = if (!is.null(colorVar)) {
-                  colorPalette[
-                    which(names(colorPalette) == unique(.data[[colorVar]]))
-                  ]
-                } else {
-                  colorPalette # variable is never NULL in subjectProfileLinePlot
-                },
-                size = shapeSize,
-                opacity = alpha
-              ),
-              showlegend = FALSE,
-              hovertemplate = .data$hovertemplate
-            )
+            color_dat <- .data[which(.data[[colorVar]] == color_val),]
           }
-        } %>%
-        plotly::add_trace(
-          type = "scatter",
-          mode = "lines",
-          line = list(
-            color = "#000000",
-            opacity = alpha
-          ),
-          showlegend = FALSE
-        ) %>%
-        {
-          if (!is.null(paramValueRangeVar)) {
-            plotly::add_ribbons(
-              .,
-              ymin = ~.data[[paramValueRangeVar[1]]],
-              ymax = ~.data[[paramValueRangeVar[2]]],
-              line = list(
-                color = ribbon_color
-              ),
-              fillcolor = ribbon_color,
-              showlegend = FALSE,
-              hoverinfo = 'none'
+          
+          # plot each shape so they can be filtered using the legend
+          for (shape_num in seq_along(shapePalettePlotly)) {
+            shape <- shapePalettePlotly[[shape_num]]
+            shape_val <- names(shapePalettePlotly)[shape_num]
+            
+            # subset data for this shape
+            if (length(shapePalettePlotly) == 1) {
+              shape_color_dat <- color_dat
+            } else {
+              shape_color_dat <- .data[which(.data[[shapeVar]] == shape_val),]
+            }
+            
+            # legend grouping
+            if (is.null(colorVar) & is.null(shapeVar)) {
+              legendname <- shape_color_dat$paramFacetVar[1]
+              legendgroup <- NULL
+            } else if (!is.null(colorVar) & is.null(shapeVar)) {
+              legendname <- paste(shape_color_dat$paramFacetVar[1], "-",
+                                  color_val)
+              legendgroup <- color_val
+            } else if (is.null(colorVar) & !is.null(shapeVar)) {
+              legendname <- paste(shape_color_dat$paramFacetVar[1], "-",
+                                  shape_val)
+              legendgroup <- shape_val
+            } else {
+              legendname <- paste(shape_color_dat$paramFacetVar[1], "-",
+                                  color_val, "-",
+                                  shape_val)
+              legendgroup <- paste(color_val, "-", shape_val)
+            }
+            
+            if (nrow(shape_color_dat) > 0) {
+              p <- p %>%
+                plotly::add_markers(
+                  type = "scatter",
+                  x = if (is.null(log_x_axis)) {
+                    shape_color_dat[[timeVar]]
+                  } else {
+                    shape_color_dat[[paste0(timeVar, "Log")]]
+                  },
+                  y = shape_color_dat$yVar,
+                  marker = list(
+                    color = color,
+                    symbol = shape,
+                    size = shapeSize,
+                    opacity = alpha
+                  ),
+                  name = legendname,
+                  showlegend = if (is.null(colorVar) & is.null(shapeVar)) {
+                    FALSE
+                  } else {
+                    TRUE
+                  },
+                  legendgroup = legendgroup,
+                  hovertemplate = shape_color_dat$hovertemplate
+                )
+            }
+          } # end of shape for loop
+        } # end of color for loop
+        
+        # legend title
+        ltitle <- NULL
+        if (!is.null(colorVar) & is.null(shapeVar)) {
+          ltitle <- paste0("<b>", colorLab, "</b>")
+        } else if (is.null(colorVar) & !is.null(shapeVar)) {
+          ltitle <- paste0("<b>", shapeLab, "</b>")
+        } else {
+          ltitle <- paste0("<b>", colorLab, " -<br>", shapeLab, "</b>")
+        }
+          
+        p <- p %>%
+          plotly::add_trace(
+            type = "scatter",
+            mode = "lines",
+            line = list(
+              color = "#000000",
+              opacity = alpha
+            ),
+            showlegend = FALSE
+          ) %>%
+          {
+            if (!is.null(paramValueRangeVar)) {
+              plotly::add_ribbons(
+                .,
+                ymin = ~.data[[paramValueRangeVar[1]]],
+                ymax = ~.data[[paramValueRangeVar[2]]],
+                line = list(
+                  color = ribbon_color
+                ),
+                fillcolor = ribbon_color,
+                showlegend = FALSE,
+                hoverinfo = 'none'
+              )
+            } else {
+              .
+            }
+          } %>%
+          plotly::layout(
+            title = title,
+            xaxis = if (is.null(timeLim)) {
+              list(
+                title = xLab
+              )
+            } else {
+              list(
+                title = xLab,
+                range = timeLim,
+                constrain = "domain"
+              )
+            },
+            yaxis = list(
+              title = NA
+            ),
+            legend = list(
+              title = list(
+                text = ltitle
+              )
+            ),
+            margin = margin,
+            hoverlabel = list(
+              align = "left"
             )
-          } else {
-            .
-          }
-        } %>%
-        plotly::layout(
-          title = title,
-          xaxis = if (is.null(timeLim)) {
-            list(
-              title = xLab
-            )
-          } else {
-            list(
-              title = xLab,
-              range = timeLim,
-              constrain = "domain"
-            )
-          },
-          yaxis = list(
-            title = NA
-          ),
-          margin = margin,
-          hoverlabel = list(
-            align = "left"
+          ) %>%
+          plotly::add_annotations(
+            text = .data$paramFacetVar,
+            xref = "paper",
+            yref = "paper",
+            x = yaxis_title_shift,
+            y = 0.5,
+            xanchor = "right",
+            yanchor = "bottom",
+            showarrow = FALSE
           )
-        ) %>%
-        plotly::add_annotations(
-          text = .data$paramFacetVar,
-          xref = "paper",
-          yref = "paper",
-          x = yaxis_title_shift,
-          y = 0.5,
-          xanchor = "right",
-          yanchor = "bottom",
-          showarrow = FALSE
-        )
+        
+        p
+      }
     )
   
   plots <- plotly::subplot(
@@ -278,51 +322,6 @@ plotlyLinePlot <- function(data,
         'hoverCompareCartesian'
       )
     )
-  
-  # add legend as annotation
-  if (!is.null(shapeVar) | !is.null(colorVar)) {
-    
-    if (!is.null(shapeVar)) {
-      shapeLegendText <- purrr::imap(shapePaletteUnicode, ~ {
-        paste0(.x, "   ", .y, "<br>")
-      }) %>%
-        purrr::reduce(paste0) %>%
-        paste0("<b>", shapeLab, " Shapes</b><br>", .)
-    } else {
-      shapeLegendText <- NULL
-    }
-    
-    if (!is.null(colorVar)) {
-      colorLegendText <- purrr::imap(colorPalette, ~ {
-        paste0("<span style='color: ", .x, ";'>&#x1f534;&#xfe0e;</span>   ", .y, "<br>")
-      }) %>%
-        purrr::reduce(paste0) %>%
-        paste0("<b>", colorLab , " Colors</b><br>", .)
-    } else {
-      colorLegendText <- NULL
-    }
-    
-    if (!is.null(shapeLegendText) & !is.null(colorLegendText)) {
-      legendText <- paste0(shapeLegendText, "<br><br>", colorLegendText)
-    } else if (!is.null(shapeLegendText)) {
-      legendText <- shapeLegendText
-    } else {
-      legendText <- colorLegendText
-    }
-    
-    plots <- plotly::add_annotations(
-      plots,
-      text = legendText,
-      xref = "paper",
-      yref = "paper",
-      x = legend_x_shift,
-      y = 0.75,
-      xanchor = "right",
-      yanchor = "bottom",
-      showarrow = FALSE,
-      align = "left"
-    )
-  }
   
   # add footnote about x-axis log scale
   if (!is.null(log_x_axis)) {
