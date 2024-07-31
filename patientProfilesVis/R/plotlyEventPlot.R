@@ -163,7 +163,7 @@ plotlyEventPlot <- function(data,
           } else if (is.null(colorVar) & !is.null(shapeVar)) {
             paste0("<b>", shapeLab, "</b>")
           } else {
-            paste0("<b>", colorLab, " - ", shapeLab, "</b>")
+            paste0("<b>", colorLab, " -<br>", shapeLab, "</b>")
           }
         )
       ),

@@ -127,11 +127,12 @@ for missing time.}
 \item{margin}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
 
 \item{caption_y_shift}{see [subjectProfileIntervalPlot()] argument
-`plotly_args`}
+`plotly_caption_y_shift`}
 
-\item{log_x_axis}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
+\item{log_x_axis}{see [subjectProfileIntervalPlot()] argument
+`plotly_log_x_axis`}
 
-\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_add_vars`}
 }
 \value{
 a [plotly] object

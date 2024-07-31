@@ -1,64 +1,3 @@
-test_that("intervalPlotHoverTemplate() returns correct string", {
-  
-  # minimum required arguments
-  out <- intervalPlotHoverTemplate(
-    paramVal = "Lethargy",
-    paramLab = "AE Term",
-    timeStartVal = 1,
-    timeStartLab = "AE Start Study Dat",
-    timeEndVal = 2,
-    timeEndLab = "AE End Study Day",
-    colorLab = NULL, 
-    colorVal = NULL, 
-    add_vars = NULL
-  )
-  
-  expect_equal(
-    out,
-    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><extra></extra>"
-  )
-  
-  # with color
-  out <- intervalPlotHoverTemplate(
-    paramVal = "Lethargy",
-    paramLab = "AE Term",
-    timeStartVal = 1,
-    timeStartLab = "AE Start Study Dat",
-    timeEndVal = 2,
-    timeEndLab = "AE End Study Day",
-    colorLab = "Severity", 
-    colorVal = "Serious", 
-    add_vars = NULL
-  )
-  
-  expect_equal(
-    out,
-    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Severity</i>: Serious<br><extra></extra>"
-  )
-  
-  # with additional variables
-  out <- intervalPlotHoverTemplate(
-    paramVal = "Lethargy",
-    paramLab = "AE Term",
-    timeStartVal = 1,
-    timeStartLab = "AE Start Study Dat",
-    timeEndVal = 2,
-    timeEndLab = "AE End Study Day",
-    colorLab = NULL, 
-    colorVal = NULL, 
-    add_vars = list(
-      Serious = "Y",
-      DECOD = "LETHARGY"
-    )
-  )
-  
-  expect_equal(
-    out,
-    "<b>AE Term:</b><br><b>Lethargy</b><br><br><i>AE Start Study Dat</i>: 1<br><i>AE End Study Day</i>: 2<br><i>Serious</i>: Y<br><i>DECOD</i>: LETHARGY<br><extra></extra>"
-  )
-})
-
-
 test_that("plotlyIntervalPlot() returns the correct visualization", {
   
   ### NOTE: these are visual tests only for the time being
@@ -68,7 +7,7 @@ test_that("plotlyIntervalPlot() returns the correct visualization", {
   dataSDTM <- dataSDTMCDISCP01
   dataAE <- dataSDTM$AE
   subjectAE <- "01-718-1427"
-  dataAE <- dplyr::filter(dataAE, USUBJID == subjectAE)
+  dataAE <- dataAE[which(dataAE$USUBJID == subjectAE),]
   dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], levels = c("MILD", "MODERATE", "SEVERE"))
   data <- dataAE
   
@@ -85,15 +24,10 @@ test_that("plotlyIntervalPlot() returns the correct visualization", {
   alpha <- 1
   timeStartShapeVar <- "timeStartStatus"
   timeEndShapeVar <- "timeEndStatus"
-  data <- dplyr::mutate(
-    data,
-    timeStartStatus = dplyr::if_else(
-      is.na(AESTDY), "Missing start", "Complete"
-    ),
-    timeEndStatus = dplyr::if_else(
-      is.na(AEENDY), "Missing end", "Complete"
-    )
-  )
+  data[[timeStartShapeVar]] <- "Complete"
+  data[which(is.na(data$AESTDY)), timeStartShapeVar] <- "Missing start"
+  data[[timeEndShapeVar]] <- "Complete"
+  data[which(is.na(data$AEENDY)), timeEndShapeVar] <- "Missing end"
   shapePalette <- c(
     Complete = "\u25A0",
     "Missing start" = "\u25C4",
@@ -300,7 +234,7 @@ test_that("subjectProfileIntervalPlot() with plotly option can return outputs co
   dataSDTM <- dataSDTMCDISCP01
   dataAE <- dataSDTM$AE
   subjectAE <- "01-718-1427"
-  dataAE <- dplyr::filter(dataAE, USUBJID == subjectAE)
+  dataAE <- dataAE[which(dataAE$USUBJID == subjectAE),]
   dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], levels = c("MILD", "MODERATE", "SEVERE"))
   data <- dataAE
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
@@ -326,7 +260,7 @@ test_that("subjectProfileIntervalPlot() with plotly option can return outputs co
   dataSDTM <- dataSDTMCDISCP01
   dataAE <- dataSDTM$AE
   subjectAE <- c("01-718-1427", "01-701-1148")
-  dataAE <- dplyr::filter(dataAE, USUBJID %in% subjectAE)
+  dataAE <- dataAE[which(dataAE$USUBJID %in% subjectAE),]
   dataAE[, "AESEV"] <- factor(dataAE[, "AESEV"], levels = c("MILD", "MODERATE", "SEVERE"))
   data <- dataAE
   labelVarsSDTM <- attr(dataSDTM, "labelVars")

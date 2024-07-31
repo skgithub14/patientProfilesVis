@@ -8,10 +8,11 @@
 #' @inheritParams subjectProfileIntervalPlot
 #' @param margin see [subjectProfileIntervalPlot()] argument `plotly_args`
 #' @param caption_y_shift see [subjectProfileIntervalPlot()] argument
-#'   `plotly_args`
-#' @param log_x_axis see [subjectProfileIntervalPlot()] argument `plotly_args`
-#' @param add_vars see [subjectProfileIntervalPlot()] argument `plotly_args`
-#'
+#'   `plotly_caption_y_shift`
+#' @param log_x_axis see [subjectProfileIntervalPlot()] argument
+#'   `plotly_log_x_axis`
+#' @param add_vars see [subjectProfileIntervalPlot()] argument `plotly_add_vars`
+#' 
 #' @returns a [plotly] object
 #' @export
 #'
@@ -65,29 +66,17 @@ plotlyIntervalPlot <- function(data,
   shapePalettePlotly <- convert_shapes_to_plotly_symbols(shapes = shapePalette)
   
   # create tooltip hovertemplate column in the data
-  if (!is.null(colorVar)) {
-    colorVarDat <- data[[colorVar]]
-  } else {
-    colorVarDat <- NULL
-  }
-  if (!is.null(add_vars)) {
-    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
-                                                add_vars = add_vars, 
-                                                labelVars = labelVars)
-  }
-  data <- dplyr::mutate(
-    data,
-    hovertemplate = intervalPlotHoverTemplate(
-      paramVal = !!rlang::sym(paramVar),
-      paramLab = paramLab,
-      timeStartVal = !!rlang::sym(timeStartVar),
-      timeStartLab = timeStartLab,
-      timeEndVal = !!rlang::sym(timeEndVar),
-      timeEndLab = timeEndLab,
-      colorLab = colorLab, 
-      colorVal = colorVarDat, 
-      add_vars = add_vars
-    )
+  data$hovertemplate <- intervalPlotHoverTemplate(
+    data = data,
+    paramVar = paramVar,
+    paramLab = paramLab,
+    timeStartVar = timeStartVar,
+    timeStartLab = timeStartLab,
+    timeEndVar = timeEndVar,
+    timeEndLab = timeEndVar,
+    colorLab = colorLab, 
+    colorVar = colorVar, 
+    add_vars = add_vars
   )
   
   p <- plotly::plot_ly(data = data)
@@ -101,17 +90,16 @@ plotlyIntervalPlot <- function(data,
     if (length(colorPalette) == 1) {
       color_dat <- data
     } else {
-      color_dat <- dplyr::filter(data, !!rlang::sym(colorVar) == color_val)
+      color_dat <- data[which(data[[colorVar]] == color_val),]
     }
     
     # plot AEs where start time is present and end time is missing
-    start_dat <- dplyr::filter(
-      color_dat,
-      !is.na(!!rlang::sym(timeEndShapeVar)) &
-        !is.na(!!rlang::sym(timeStartShapeVar)) &
-        !!rlang::sym(timeStartShapeVar) == "Complete" & 
-        !!rlang::sym(timeEndShapeVar) == "Missing end"
-    )
+    start_dat <- color_dat[which(
+      !is.na(color_dat[[timeEndShapeVar]]) &
+      color_dat[[timeEndShapeVar]] == "Missing end" &
+      !is.na(color_dat[[timeStartShapeVar]]) &
+      color_dat[[timeStartShapeVar]] == "Complete"
+    ),]
     
     if (nrow(start_dat) > 0) {
       p <- p |>
@@ -138,13 +126,12 @@ plotlyIntervalPlot <- function(data,
     }
     
     # plot AEs where end time is present and start time is missing
-    end_dat <- dplyr::filter(
-      color_dat,
-      !is.na(!!rlang::sym(timeEndShapeVar)) &
-        !is.na(!!rlang::sym(timeStartShapeVar)) &
-        !!rlang::sym(timeStartShapeVar) == "Missing start" & 
-        !!rlang::sym(timeEndShapeVar) == "Complete"
-    )
+    end_dat <- color_dat[which(
+      !is.na(color_dat[[timeEndShapeVar]]) &
+      color_dat[[timeEndShapeVar]] == "Complete" &
+      !is.na(color_dat[[timeStartShapeVar]]) &
+      color_dat[[timeStartShapeVar]] == "Missing start"
+    ),]
     
     if (nrow(end_dat) > 0) {
       p <- p |>
@@ -171,11 +158,12 @@ plotlyIntervalPlot <- function(data,
     }
     
     # plot AEs that have both start and end dates
-    segment_dat <- dplyr::filter(
-      color_dat,
-      !!rlang::sym(timeStartShapeVar) == "Complete" &
-      !!rlang::sym(timeEndShapeVar) == "Complete"
-    )
+    segment_dat <- color_dat[which(
+      !is.na(color_dat[[timeEndShapeVar]]) &
+      color_dat[[timeEndShapeVar]] == "Complete" &
+      !is.na(color_dat[[timeStartShapeVar]]) &
+      color_dat[[timeStartShapeVar]] == "Complete"
+    ),]
     
     if (nrow(segment_dat) > 0) {
       p <- p |>
@@ -229,7 +217,7 @@ plotlyIntervalPlot <- function(data,
       legend = list(
         title = list(
           text = if (!is.null(colorVar)) {
-            paste0("<b>", colorLab, " - ", shapeLab, "</b>")
+            paste0("<b>", colorLab, " -<br>", shapeLab, "</b>")
           } else {
             paste0("<b>", shapeLab, "</b>")
           }
@@ -268,55 +256,89 @@ plotlyIntervalPlot <- function(data,
 
 #' Create [plotly] tool tip hover template for an interval plot
 #'
-#' @param paramVal the value of `paramVar` for the tooltip
-#' @param timeStartVal the value of `timeStartVar` for the tooltip
-#' @param timeEndVal the value of `timeEndVar` for the tooltip
-#' @param colorVal the value of `colorVar` for the tooltip
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileIntervalPlot
 #' @inheritParams plotlyIntervalPlot
 #'
-#' @returns a string with html formatting
+#' @returns a character vector of html formatted strings
 #' 
-intervalPlotHoverTemplate <- function(paramVal,
+intervalPlotHoverTemplate <- function(data,
+                                      paramVar,
                                       paramLab,
-                                      timeStartVal,
+                                      timeStartVar,
                                       timeStartLab,
-                                      timeEndVal,
+                                      timeEndVar,
                                       timeEndLab,
                                       colorLab = NULL, 
-                                      colorVal = NULL, 
+                                      colorVar = NULL, 
                                       add_vars = NULL) {
   
-  # title (usually the parameter name) and y value
-  ht <- paste0(
-    '<b>', paramLab, ':</b><br>',
-    '<b>', paramVal, '</b><br><br>',
-    '<i>', timeStartLab, '</i>: ', timeStartVal, '<br>',
-    '<i>', timeEndLab, '</i>: ', timeEndVal, '<br>'
+  make_template <- function(data,
+                            paramVal,
+                            paramLab,
+                            timeStartVal,
+                            timeStartLab,
+                            timeEndVal,
+                            timeEndLab,
+                            colorLab, 
+                            colorVal, 
+                            add_vars) {
+    
+    # title (usually the parameter name) and y value
+    ht <- paste0(
+      '<b>', paramLab, ':</b><br>',
+      '<b>', paramVal, '</b><br><br>',
+      '<i>', timeStartLab, '</i>: ', timeStartVal, '<br>',
+      '<i>', timeEndLab, '</i>: ', timeEndVal, '<br>'
+    )
+    
+    # optional color variable
+    if (!is.null(colorLab) & !is.null(colorVal)) {
+      ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
+    }
+    
+    ## additional variables
+    if (!is.null(add_vars)) {
+      add_vars1 <- purrr::imap(add_vars, \(value, label) {
+        purrr::map_chr(value, \(val) {
+          if (!is.na(val) & val != "") {
+            paste0('<i>', label, '</i>: ', val, '<br>')
+          } else {
+            ""
+          }
+        })
+      }) %>%
+        purrr::discard(is.null) %>%
+        purrr::reduce(paste0)
+      ht <- paste0(ht, add_vars1)
+    }
+    
+    ht <- paste0(ht, '<extra></extra>')
+    return(ht)
+  }
+  
+  if (!is.null(colorVar)) {
+    colorVarDat <- data[[colorVar]]
+  } else {
+    colorVarDat <- NULL
+  }
+  if (!is.null(add_vars)) {
+    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
+                                                add_vars = add_vars, 
+                                                labelVars = labelVars)
+  }
+  
+  hovertemplates <- make_template(
+    paramVal = data[[paramVar]],
+    paramLab = paramLab,
+    timeStartVal = data[[timeStartVar]],
+    timeStartLab = timeStartLab,
+    timeEndVal = data[[timeEndVar]],
+    timeEndLab = timeEndLab,
+    colorLab = colorLab, 
+    colorVal = colorVarDat, 
+    add_vars = add_vars
   )
   
-  # optional color variable
-  if (!is.null(colorLab) & !is.null(colorVal)) {
-    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
-  }
-  
-  ## additional variables
-  if (!is.null(add_vars)) {
-    add_vars1 <- purrr::imap(add_vars, \(value, label) {
-      purrr::map_chr(value, \(val) {
-        if (!is.na(val) & val != "") {
-          paste0('<i>', label, '</i>: ', val, '<br>')
-        } else {
-          ""
-        }
-      })
-    }) %>%
-      purrr::discard(is.null) %>%
-      purrr::reduce(paste0)
-    ht <- paste0(ht, add_vars1)
-  }
-  
-  ht <- paste0(ht, '<extra></extra>')
-  return(ht)
+  return(hovertemplates)
 }

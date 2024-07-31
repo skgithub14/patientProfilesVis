@@ -5,42 +5,48 @@
 \title{Create [plotly] tool tip hover template for an interval plot}
 \usage{
 intervalPlotHoverTemplate(
-  paramVal,
+  data,
+  paramVar,
   paramLab,
-  timeStartVal,
+  timeStartVar,
   timeStartLab,
-  timeEndVal,
+  timeEndVar,
   timeEndLab,
   colorLab = NULL,
-  colorVal = NULL,
+  colorVar = NULL,
   add_vars = NULL
 )
 }
 \arguments{
-\item{paramVal}{the value of `paramVar` for the tooltip}
+\item{data}{Data.frame with data.}
+
+\item{paramVar}{Character vector with variable(s) of \code{data} 
+with parameters. Variable content is displayed in the y-axis.}
 
 \item{paramLab}{Named character vector, 
 with label for the parameter variable(s) (\code{paramVar}).\cr
 This is used to set the default title.}
 
-\item{timeStartVal}{the value of `timeStartVar` for the tooltip}
+\item{timeStartVar}{String, variable of \code{data} 
+with start of time interval.}
 
 \item{timeStartLab}{String, label for \code{timeStartVar},
 displayed in a message and in the plot caption.}
 
-\item{timeEndVal}{the value of `timeEndVar` for the tooltip}
+\item{timeEndVar}{String, variable of \code{data} 
+with end of time interval.}
 
 \item{timeEndLab}{String, label for \code{timeEndVar},
 displayed in a message and in the plot caption.}
 
 \item{colorLab}{String, label for \code{colorVar}.}
 
-\item{colorVal}{the value of `colorVar` for the tooltip}
+\item{colorVar}{String, variable of \code{data} with color.}
 
-\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileIntervalPlot()] argument `plotly_add_vars`}
 }
 \value{
-a string with html formatting
+a character vector of html formatted strings
 }
 \description{
 Create [plotly] tool tip hover template for an interval plot
