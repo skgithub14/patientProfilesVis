@@ -30,46 +30,31 @@
 #' to the data range if wider.}
 #' }
 #' @param shapeSize Size for the symbols, any integer or object supported by
-#'   \code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`, 
+#'   \code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`,
 #'   recommend setting this value to `7` or higher.
 #' @param title String with title, label of the parameter value variable by
 #'   default.
-#' @param plotly_args a list with the following named values:
-#'   \itemize{
-#'     \item{`paramValueVarUnits`}{an optional string, the column in `data`
-#'       with the parameter's units which will be added to the tooltip
-#'       information; default is `NULL`} 
-#'     \item{`add_vars`}{an optional
-#'       list with additional data that should be added to the [plotly]
-#'       tooltip. If named, the names are the labels in the tooltip. If unnamed, 
-#'       the tooltip labels from `labelVars` are used instead. The list values 
-#'       are the columns in `data` where the values will be pulled from; default 
-#'       is `NULL`} 
-#'     \item{`margin`}{a named list of numeric values specifying the plot 
-#'       margins, names should be `l` (left), `r` (right), `b` (bottom), 
-#'       `t` (top), and `pad` (padding); default is 
-#'       `list(l = 250, r = 50, b = 75, t = 50, pad = 4)`. This argument can be 
-#'       adjusted along with `yaxis_title_shift` to 
-#'       adjust the y-axis title location in 
-#'       relationship to the plotting area.}
-#'     \item{`yaxis_title_shift`}{a numeric value (typically negative), adjusts
-#'       y-axis title offset. This values works with `margin` argument, 
-#'       specifically the left margin. Default is `-0.035`.} 
-#'     \item{`showspikes`}{a logical value, whether x-axis spikeline should be
-#'       displayed; default is `TRUE`}
-#'     \item{`spikecolor`}{a string, the spike line color; default is `'red'`, 
-#'       `showspikes` must be `TRUE` for this argument to take effect}
-#'     \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
-#'       should be scaled. If `'neg'`, only the negative values are scaled, if 
-#'       `'pos'` only the positive values are scaled, if `'both'` the positive 
-#'       and negative values are scaled. Default is `NULL`, in which case the 
-#'       default [plotly] x-axis scale is used.}
-#'     \item{`log_footnote_y_shift`}{a numeric value used to control the y 
-#'       position of the x-axis log scale footnote; only applicable if 
-#'       `log_x_axis` is not `NULL`. This is typically a negative number between 
-#'       0 and -1 and it works with the `margin` argument, specifically the 
-#'       bottom margin. Default is `-0.1`.}
-#'   }
+#' @param plotly_paramValueVarUnits an optional string, the column in `data`
+#'   with the parameter's units which will be added to the tooltip information;
+#'   default is `NULL`
+#' @param plotly_margin a named list of numeric values specifying the plot
+#'   margins, names should be `l` (left), `r` (right), `b` (bottom), `t` (top),
+#'   and `pad` (padding); default is `list(l = 250, r = 50, b = 75, t = 50, pad
+#'   = 4)`. This argument can be adjusted along with `yaxis_title_shift` to
+#'   adjust the y-axis title location in relationship to the plotting area.
+#' @param plotly_yaxis_title_shift a numeric value (typically negative), adjusts
+#'   y-axis title offset. This values works with `margin` argument, specifically
+#'   the left margin. Default is `-0.035`.
+#' @param plotly_showspikes a logical value, whether x-axis spikeline should be
+#'   displayed; default is `TRUE`
+#' @param plotly_spikecolor a string, the spike line color; default is `'red'`,
+#'   `showspikes` must be `TRUE` for this argument to take effect
+#' @param plotly_log_footnote_y_shift a numeric value used to control the y
+#'   position of the x-axis log scale footnote; only applicable if `log_x_axis`
+#'   is not `NULL`. This is typically a negative number between 0 and -1 and it
+#'   works with the `margin` argument, specifically the bottom margin. Default
+#'   is `-0.1`.
+#' 
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams filterData
 #' @inheritParams getPageVar
@@ -116,22 +101,20 @@ subjectProfileLinePlot <- function(
 	paging = TRUE,
 	alpha = 1, shapeSize = rel(1),
 	plotly = FALSE,
-	plotly_args = list(
-	  paramValueVarUnits = NULL,
-	  add_vars = NULL,
-	  margin = list(
-	    l = 250,
-	    r = 50,
-	    b = 75,
-	    t = 50,
-	    pad = 4
-	  ),
-	  yaxis_title_shift = -0.035,
-	  showspikes = TRUE,
-	  spikecolor = 'red',
-	  log_x_axis = NULL,
-	  log_footnote_y_shift = -0.1
-	)
+  plotly_paramValueVarUnits = NULL,
+  plotly_add_vars = NULL,
+  plotly_margin = list(
+    l = 250,
+    r = 50,
+    b = 75,
+    t = 50,
+    pad = 4
+  ),
+  plotly_yaxis_title_shift = -0.035,
+  plotly_showspikes = TRUE,
+  plotly_spikecolor = 'red',
+  plotly_log_x_axis = NULL,
+  plotly_log_footnote_y_shift = -0.1
 ){
 	
 	yLimFrom <- match.arg(yLimFrom)
@@ -236,28 +219,10 @@ subjectProfileLinePlot <- function(
 	  subject <- unique(dataSubject[, subjectVar])
 	  
 	  if (plotly) {
-	    
-	    # reset defaults if they were dropped from `plotly_args`
-	    if (is.null(plotly_args$margin)) {
-	      plotly_args$margin <- list(l = 250, r = 50, b = 75, t = 50, pad = 4)
-	    }
-	    if (is.null(plotly_args$yaxis_title_shift)) {
-	      plotly_args$yaxis_title_shift <- -0.035
-	    }
-	    if (is.null(plotly_args$showspikes)) {
-	      plotly_args$showspikes <- TRUE
-	    }
-	    if (is.null(plotly_args$spikecolor)) {
-	      plotly_args$spikecolor <- 'red'
-	    }
-	    if (is.null(plotly_args$log_footnote_y_shift)) {
-	      plotly_args$log_footnote_y_shift <- -0.1
-	    }
-	    
 	    pltly <- plotlyLinePlot(
 	      data = dataSubject,
         paramValueVar = paramValueVar,
-        paramValueVarUnits = plotly_args$paramValueVarUnits, # NEED TO ADD ARGUMENT
+        paramValueVarUnits =  plotly_paramValueVarUnits,
         paramValueRangeVar = paramValueRangeVar,
         colorValueRange = colorValueRange,
         colorVar = colorVar,
@@ -274,13 +239,13 @@ subjectProfileLinePlot <- function(
         title = title,
         xLab = xLab,
 	      labelVars = labelVars,
-        add_vars = plotly_args$add_vars,
-        margin = plotly_args$margin,
-        yaxis_title_shift = plotly_args$yaxis_title_shift,
-	      showspikes = plotly_args$showspikes,
-        spikecolor = plotly_args$spikecolor,
-	      log_x_axis = plotly_args$log_x_axis,
-	      log_footnote_y_shift = plotly_args$log_footnote_y_shift
+        add_vars =  plotly_add_vars,
+        margin =  plotly_margin,
+        yaxis_title_shift =  plotly_yaxis_title_shift,
+	      showspikes =  plotly_showspikes,
+        spikecolor =  plotly_spikecolor,
+	      log_x_axis =  plotly_log_x_axis,
+	      log_footnote_y_shift =  plotly_log_footnote_y_shift
 	    )
 	    
 	    ## set attributes

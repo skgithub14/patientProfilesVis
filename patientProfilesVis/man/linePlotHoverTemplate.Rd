@@ -52,7 +52,7 @@ typically reference range indicators.\cr Range can differ per parameter and
 even per time point. This range is represented as a ribbon in the plot
 background. e.g. to represent the reference range of the variable.}
 
-\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_add_vars`}
 
 \item{labelVars}{Named character vector with variable labels 
 (names are the variable code)}

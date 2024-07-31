@@ -345,9 +345,7 @@ test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
     labelVars = labelVarsSDTM,
     shapeSize = 7,
     plotly = TRUE,
-    plotly_args = list(
-      paramValueVarUnits = "LBSTRESU"
-    )
+    plotly_paramValueVarUnits = "LBSTRESU"
   )
   
   p$`01-704-1445`

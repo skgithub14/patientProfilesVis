@@ -88,7 +88,7 @@ e.g. 'cross' instead of \code{4}, in case Unicode
 symbols should also be used.}
 
 \item{shapeSize}{Size for the symbols, any integer or object supported by
-\code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`, 
+\code{size} in \code{\link[ggplot2]{geom_point}}. If `plotly = TRUE`,
 recommend setting this value to `7` or higher.}
 
 \item{timeVar}{String, variable of \code{data} with time,
@@ -113,21 +113,21 @@ used to align the plots in the final report.}
 \item{labelVars}{Named character vector with variable labels 
 (names are the variable code)}
 
-\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_add_vars`}
 
-\item{margin}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{margin}{see [subjectProfileLinePlot()] argument `plotly_margin`}
 
 \item{yaxis_title_shift}{see [subjectProfileLinePlot()] argument
-`plotly_args`}
+`plotly_yaxis_title_shift`}
 
-\item{showspikes}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{showspikes}{see [subjectProfileLinePlot()] argument `plotly_showspikes`}
 
-\item{spikecolor}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{spikecolor}{see [subjectProfileLinePlot()] argument `plotly_spikecolor`}
 
-\item{log_x_axis}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{log_x_axis}{see [subjectProfileLinePlot()] argument `plotly_log_x_axis`}
 
 \item{log_footnote_y_shift}{see [subjectProfileLinePlot()] argument
-`plotly_args`}
+`plotly_log_footnote_y_shift`}
 }
 \value{
 a [plotly] object

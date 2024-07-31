@@ -38,7 +38,7 @@ but not \code{shapeVar} is not specified.}
 
 \item{shapeVal}{optional, the value of `shapeVar` for the tooltip}
 
-\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_add_vars`}
 
 \item{title}{a string, the tool tip title}
 

@@ -6,15 +6,15 @@
 #' @param data a data frame with data for 1 subject only
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
-#' @param add_vars see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param margin see [subjectProfileLinePlot()] argument `plotly_args`
+#' @param add_vars see [subjectProfileLinePlot()] argument `plotly_add_vars`
+#' @param margin see [subjectProfileLinePlot()] argument `plotly_margin`
 #' @param yaxis_title_shift see [subjectProfileLinePlot()] argument
-#'   `plotly_args`
-#' @param showspikes see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_args`
-#' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_args`
+#'   `plotly_yaxis_title_shift`
+#' @param showspikes see [subjectProfileLinePlot()] argument `plotly_showspikes`
+#' @param spikecolor see [subjectProfileLinePlot()] argument `plotly_spikecolor`
+#' @param log_x_axis see [subjectProfileLinePlot()] argument `plotly_log_x_axis`
 #' @param log_footnote_y_shift see [subjectProfileLinePlot()] argument
-#'   `plotly_args`
+#'   `plotly_log_footnote_y_shift`
 #' 
 #' @returns a [plotly] object
 #' @export

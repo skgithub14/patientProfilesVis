@@ -115,6 +115,18 @@ e.g. output of the \code{\link{subjectProfileReportFormat}} function}
 
 \item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
 [ggplot2] output; default is `FALSE`}
+
+\item{plotly_add_vars}{an optional list with additional data that should be
+added to the [plotly] tooltip. If named, the names are the labels in the
+tooltip. If unnamed, the tooltip labels from `labelVars` are used instead.
+The list values are the columns in `data` where the values will be pulled
+from; default is `NULL`}
+
+\item{plotly_log_x_axis}{an optional string indicating if and how the x-axis
+should be scaled. If `'neg'`, only the negative values are scaled, if
+`'pos'` only the positive values are scaled, if `'both'` the positive and
+negative values are scaled. Default is `NULL`, in which case the default
+[plotly] x-axis scale is used.}
 }
 \value{
 No return value, used for the documentation of 
