@@ -49,6 +49,9 @@ plotlyIntervalPlot <- function(data,
                                log_x_axis = NULL,
                                add_vars = NULL) {
   
+  # break up y values if too long
+  data$yVar <- gsub("\n", "<br>", data$yVar)
+  
   # log the x-axis
   if (!is.null(log_x_axis)) {
     logOut <- logPlotlyXAxis(data = data, 
@@ -68,8 +71,7 @@ plotlyIntervalPlot <- function(data,
   # create tooltip hovertemplate column in the data
   data$hovertemplate <- intervalPlotHoverTemplate(
     data = data,
-    paramVar = paramVar,
-    paramLab = paramLab,
+    yLab = toString(paramLab),
     timeStartVar = timeStartVar,
     timeStartLab = timeStartLab,
     timeEndVar = timeEndVar,
@@ -109,7 +111,7 @@ plotlyIntervalPlot <- function(data,
             } else {
               start_dat[[paste0(timeStartVar, "Log")]]
             },
-          y = start_dat[[paramVar]],
+          y = start_dat$yVar,
           color = color,
           type = 'scatter',
           mode = 'markers',
@@ -141,7 +143,7 @@ plotlyIntervalPlot <- function(data,
           } else {
             end_dat[[paste0(timeEndVar, "Log")]]
           },
-          y = end_dat[[paramVar]],
+          y = end_dat$yVar,
           color = color,
           type = 'scatter',
           mode = 'markers',
@@ -179,8 +181,8 @@ plotlyIntervalPlot <- function(data,
           } else {
             segment_dat[[paste0(timeEndVar, "Log")]]
           },
-          y = segment_dat[[paramVar]],
-          yend = segment_dat[[paramVar]],
+          y = segment_dat$yVar,
+          yend = segment_dat$yVar,
           marker = list(
             symbol = shapePalettePlotly[["Complete"]],
             size = shapeSize,
@@ -263,8 +265,7 @@ plotlyIntervalPlot <- function(data,
 #' @returns a character vector of html formatted strings
 #' 
 intervalPlotHoverTemplate <- function(data,
-                                      paramVar,
-                                      paramLab,
+                                      yLab,
                                       timeStartVar,
                                       timeStartLab,
                                       timeEndVar,
@@ -273,9 +274,8 @@ intervalPlotHoverTemplate <- function(data,
                                       colorVar = NULL, 
                                       add_vars = NULL) {
   
-  make_template <- function(data,
-                            paramVal,
-                            paramLab,
+  make_template <- function(yVal,
+                            yLab,
                             timeStartVal,
                             timeStartLab,
                             timeEndVal,
@@ -286,8 +286,8 @@ intervalPlotHoverTemplate <- function(data,
     
     # title (usually the parameter name) and y value
     ht <- paste0(
-      '<b>', paramLab, ':</b><br>',
-      '<b>', paramVal, '</b><br><br>',
+      '<b>', yLab, ':</b><br>',
+      '<b>', yVal, '</b><br><br>',
       '<i>', timeStartLab, '</i>: ', timeStartVal, '<br>',
       '<i>', timeEndLab, '</i>: ', timeEndVal, '<br>'
     )
@@ -329,8 +329,8 @@ intervalPlotHoverTemplate <- function(data,
   }
   
   hovertemplates <- make_template(
-    paramVal = data[[paramVar]],
-    paramLab = paramLab,
+    yVal = data$yVar,
+    yLab = yLab,
     timeStartVal = data[[timeStartVar]],
     timeStartLab = timeStartLab,
     timeEndVal = data[[timeEndVar]],

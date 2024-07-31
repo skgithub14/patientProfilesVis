@@ -43,6 +43,9 @@ plotlyEventPlot <- function(data,
                             log_x_axis = NULL,
                             add_vars = NULL) {
   
+  # break up y values if too long
+  data$yVar <- gsub("\n", "<br>", data$yVar)
+  
   # log the x-axis
   if (!is.null(log_x_axis)) {
     logOut <- logPlotlyXAxis(data = data, 

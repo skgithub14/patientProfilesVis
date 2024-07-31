@@ -52,6 +52,9 @@ plotlyLinePlot <- function(data,
                            log_x_axis = NULL,
                            log_footnote_y_shift = -0.1) {
   
+  # break up y values if too long
+  data$paramFacetVar <- gsub("\n", "<br>", data$paramFacetVar)
+  
   # log the x-axis
   if (!is.null(log_x_axis)) {
     logOut <- logPlotlyXAxis(data = data, 
@@ -142,7 +145,9 @@ plotlyLinePlot <- function(data,
             if (length(shapePalettePlotly) == 1) {
               shape_color_dat <- color_dat
             } else {
-              shape_color_dat <- .data[which(.data[[shapeVar]] == shape_val),]
+              shape_color_dat <- color_dat[
+                which(color_dat[[shapeVar]] == shape_val),
+              ]
             }
             
             # legend grouping

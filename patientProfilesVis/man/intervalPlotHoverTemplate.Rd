@@ -6,8 +6,7 @@
 \usage{
 intervalPlotHoverTemplate(
   data,
-  paramVar,
-  paramLab,
+  yLab,
   timeStartVar,
   timeStartLab,
   timeEndVar,
@@ -20,12 +19,7 @@ intervalPlotHoverTemplate(
 \arguments{
 \item{data}{Data.frame with data.}
 
-\item{paramVar}{Character vector with variable(s) of \code{data} 
-with parameters. Variable content is displayed in the y-axis.}
-
-\item{paramLab}{Named character vector, 
-with label for the parameter variable(s) (\code{paramVar}).\cr
-This is used to set the default title.}
+\item{yLab}{String, label for the y-axis.}
 
 \item{timeStartVar}{String, variable of \code{data} 
 with start of time interval.}
