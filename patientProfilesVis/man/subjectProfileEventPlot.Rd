@@ -41,8 +41,10 @@ subjectProfileEventPlot(
   formatReport = subjectProfileReportFormat(),
   paging = TRUE,
   plotly = FALSE,
-  plotly_args = list(margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),
-    log_footnote_y_shift = -0.12, log_x_axis = NULL, add_vars = NULL)
+  plotly_margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),
+  plotly_log_footnote_y_shift = -0.12,
+  plotly_log_x_axis = NULL,
+  plotly_add_vars = NULL
 )
 }
 \arguments{
@@ -188,31 +190,29 @@ If FALSE, the entire plot is included in one single page.}
 \item{plotly}{a logical value, `TRUE` for [plotly] output, `FALSE` for a
 [ggplot2] output; default is `FALSE`}
 
-\item{plotly_args}{a list with the following named values:
-\itemize{
-  \item{`add_vars`}{an optional
-    list with additional data that should be added to the [plotly]
-    tooltip. If named, the names are the labels in the tooltip. If unnamed, 
-    the tooltip labels from `labelVars` are used instead. The list values 
-    are the columns in `data` where the values will be pulled from; default 
-    is `NULL`} 
-  \item{`margin`}{a named list of numeric values specifying the plot
-    margins, names should be `l` (left), `r` (right), `b` (bottom),
-    `t` (top), and `pad` (padding); default is
-    `list(l = 50, r = 50, b = 50, t = 50, pad = 4)`. This argument can be
-    adjusted along with `caption_y_shift` to adjust the caption vertical 
-    position in relationship to the plotting area.}
-  \item{`log_x_axis`}{an optional string indicating if and how the x-axis 
-    should be scaled. If `'neg'`, only the negative values are scaled, if 
-    `'pos'` only the positive values are scaled, if `'both'` the positive 
-    and negative values are scaled. Default is `NULL`, in which case the 
-    default [plotly] x-axis scale is used.}
-  \item{`log_footnote_y_shift`}{a numeric value used to control the y 
-    position of the x-axis log scale footnote; only applicable if 
-    `log_x_axis` is not `NULL`. This is typically a negative number between 
-    0 and -1 and it works with the `margin` argument, specifically the 
-    bottom margin. Default is `-0.12`.}
-}}
+\item{plotly_margin}{a named list of numeric values specifying the plot
+margins, names should be `l` (left), `r` (right), `b` (bottom), `t` (top),
+and `pad` (padding); default is `list(l = 50, r = 50, b = 50, t = 50, pad =
+4)`. This argument can be adjusted along with `caption_y_shift` to adjust
+the caption vertical position in relationship to the plotting area.}
+
+\item{plotly_log_footnote_y_shift}{a numeric value used to control the y
+position of the x-axis log scale footnote; only applicable if `log_x_axis`
+is not `NULL`. This is typically a negative number between 0 and -1 and it
+works with the `margin` argument, specifically the bottom margin. Default
+is `-0.12`.}
+
+\item{plotly_log_x_axis}{an optional string indicating if and how the x-axis
+should be scaled. If `'neg'`, only the negative values are scaled, if
+`'pos'` only the positive values are scaled, if `'both'` the positive and
+negative values are scaled. Default is `NULL`, in which case the default
+[plotly] x-axis scale is used.}
+
+\item{plotly_add_vars}{an optional list with additional data that should be
+added to the [plotly] tooltip. If named, the names are the labels in the
+tooltip. If unnamed, the tooltip labels from `labelVars` are used instead.
+The list values are the columns in `data` where the values will be pulled
+from; default is `NULL`}
 }
 \value{
 list of (across subjects) of list (across modules) of \code{\link[ggplot2]{ggplot2} objects}, 

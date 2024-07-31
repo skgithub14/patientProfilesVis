@@ -97,14 +97,15 @@ used to align the plots in the final report.}
 \item{labelVars}{Named character vector with variable labels 
 (names are the variable code)}
 
-\item{margin}{see [subjectProfileEventPlot()] argument `plotly_args`}
+\item{margin}{see [subjectProfileEventPlot()] argument `plotly_margin`}
 
 \item{log_footnote_y_shift}{see [subjectProfileEventPlot()] argument
-`plotly_args`}
+`plotly_log_footnote_y_shift`}
 
-\item{log_x_axis}{see [subjectProfileEventPlot()] argument `plotly_args`}
+\item{log_x_axis}{see [subjectProfileEventPlot()] argument
+`plotly_log_x_axis`}
 
-\item{add_vars}{see [subjectProfileEventPlot()] argument `plotly_args`}
+\item{add_vars}{see [subjectProfileEventPlot()] argument `plotly_add_vars`}
 }
 \value{
 a [plotly] object

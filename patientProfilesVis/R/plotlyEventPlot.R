@@ -4,11 +4,12 @@
 #' This function is designed to be called by [subjectProfileEventPlot()].
 #'
 #' @param data a data frame with data for 1 subject only
-#' @param margin see [subjectProfileEventPlot()] argument `plotly_args`
+#' @param margin see [subjectProfileEventPlot()] argument `plotly_margin`
 #' @param log_footnote_y_shift see [subjectProfileEventPlot()] argument
-#'   `plotly_args`
-#' @param log_x_axis see [subjectProfileEventPlot()] argument `plotly_args`
-#' @param add_vars see [subjectProfileEventPlot()] argument `plotly_args`
+#'   `plotly_log_footnote_y_shift`
+#' @param log_x_axis see [subjectProfileEventPlot()] argument
+#'   `plotly_log_x_axis`
+#' @param add_vars see [subjectProfileEventPlot()] argument `plotly_add_vars`
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileEventPlot
 #'
@@ -60,34 +61,17 @@ plotlyEventPlot <- function(data,
   shapePalettePlotly <- convert_shapes_to_plotly_symbols(shapes = shapePalette)
   
   # create hovertemplate column in the data
-  if (!is.null(colorVar)) {
-    colorVarDat <- data[[colorVar]]
-  } else {
-    colorVarDat <- NULL
-  }
-  if (!is.null(shapeVar)) {
-    shapeVarDat <- data[[shapeVar]]
-  } else {
-    shapeVarDat <- NULL
-  }
-  if (!is.null(add_vars)) {
-    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
-                                                add_vars = add_vars, 
-                                                labelVars = labelVars)
-  }
-  data <- dplyr::mutate(
-    data,
-    hovertemplate = eventPlotHoverTemplate(
-      paramVal = yVar,
-      paramLab = paramLab,
-      timeVal = !!rlang::sym(timeVar),
-      timeLab = timeLab, 
-      colorLab = colorLab, 
-      colorVal = colorVarDat, 
-      shapeLab = shapeLab, 
-      shapeVal = shapeVarDat,
-      add_vars = add_vars
-    )
+  data$hovertemplate <- eventPlotHoverTemplate(
+    data = data,
+    paramVar = "yVar",
+    paramLab = paramLab,
+    timeVar = timeVar,
+    timeLab = timeLab, 
+    colorLab = colorLab, 
+    colorVar = colorVar, 
+    shapeLab = shapeLab, 
+    shapeVar = shapeVar,
+    add_vars = add_vars
   )
   
   # initialize plotting object
@@ -102,7 +86,7 @@ plotlyEventPlot <- function(data,
     if (length(colorPalette) == 1) {
       color_dat <- data
     } else {
-      color_dat <- dplyr::filter(data, !!rlang::sym(colorVar) == color_val)
+      color_dat <- data[which(data[[colorVar]] == color_val),]
     }
     
     # plot each shape so they can be filtered using the legend
@@ -114,8 +98,7 @@ plotlyEventPlot <- function(data,
       if (length(shapePalette) == 1) {
         shape_color_dat <- color_dat
       } else {
-        shape_color_dat <- dplyr::filter(color_dat, 
-                                         !!rlang::sym(shapeVar) == shape_val)
+        shape_color_dat <- data[which(color_dat[[shapeVar]] == shape_val),]
       }
       
       # legend grouping
@@ -216,64 +199,98 @@ plotlyEventPlot <- function(data,
 
 #' Create [plotly] tool tip hover template for a event plot
 #'
-#' @param title a string, the tool tip title
-#' @param paramValueVal the value of `paramValueVar` for the tooltip
-#' @param paramValueValUnits the value of `paramValueVarUnits` for the tooltip
-#' @param timeVal the value of `timeVar` for the tooltip
-#' @param colorVal optional, the value of `colorVar` for the tooltip
-#' @param shapeVal optional, the value of `shapeVar` for the tooltip
-#' @param lln,uln optional numeric values, the lower and upper limit normal
-#'   values, respectively
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
 #' @inheritParams plotlyLinePlot
 #'
-#' @returns a string with html formatting
+#' @returns a character vector of html formatted strings
 #' 
-eventPlotHoverTemplate <- function(paramVal,
+eventPlotHoverTemplate <- function(data,
+                                   paramVar,
                                    paramLab,
-                                   timeVal,
+                                   timeVar,
                                    timeLab, 
                                    colorLab = NULL, 
-                                   colorVal = NULL, 
+                                   colorVar = NULL, 
                                    shapeLab = NULL, 
-                                   shapeVal = NULL,
+                                   shapeVar = NULL,
                                    add_vars = NULL) {
   
-  # x and y values are the minimum required
-  ht <- paste0(
-    '<b>', paramLab, ':</b><br>',
-    '<b>', paramVal, '</b><br><br>',
-    '<i>', timeLab, '</i>: ', timeVal, '<br>'
+  make_template <- function(paramVal,
+                            paramLab,
+                            timeVal,
+                            timeLab, 
+                            colorLab, 
+                            colorVal, 
+                            shapeLab, 
+                            shapeVal,
+                            add_vars) {
+  
+    # x and y values are the minimum required
+    ht <- paste0(
+      '<b>', paramLab, ':</b><br>',
+      '<b>', paramVal, '</b><br><br>',
+      '<i>', timeLab, '</i>: ', timeVal, '<br>'
+    )
+    
+    ## optional variables
+    # color
+    if (!is.null(colorLab) & !is.null(colorVal)) {
+      ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
+    }
+    
+    # shape
+    if (!is.null(shapeLab) & !is.null(shapeVal)) {
+      ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
+    }
+    
+    ## additional variables
+    if (!is.null(add_vars)) {
+      add_vars1 <- purrr::imap(add_vars, \(value, label) {
+        purrr::map_chr(value, \(val) {
+          if (!is.na(val) & val != "") {
+            paste0('<i>', label, '</i>: ', val, '<br>')
+          } else {
+            ""
+          }
+        })
+      }) %>%
+        purrr::discard(is.null) %>%
+        purrr::reduce(paste0)
+      ht <- paste0(ht, add_vars1)
+    }
+    
+    ht <- paste0(ht, '<extra></extra>')
+    return(ht)
+  }
+  
+  if (!is.null(colorVar)) {
+    colorVarDat <- data[[colorVar]]
+  } else {
+    colorVarDat <- NULL
+  }
+  if (!is.null(shapeVar)) {
+    shapeVarDat <- data[[shapeVar]]
+  } else {
+    shapeVarDat <- NULL
+  }
+  if (!is.null(add_vars)) {
+    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
+                                                add_vars = add_vars, 
+                                                labelVars = labelVars)
+  }
+  
+  hovertemplates <- make_template(
+    paramVal = data[[paramVar]],
+    paramLab = paramLab,
+    timeVal = data[[timeVar]],
+    timeLab = timeLab, 
+    colorLab = colorLab, 
+    colorVal = colorVarDat, 
+    shapeLab = shapeLab, 
+    shapeVal = shapeVarDat,
+    add_vars = add_vars
   )
   
-  ## optional variables
-  # color
-  if (!is.null(colorLab) & !is.null(colorVal)) {
-    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
-  }
-  
-  # shape
-  if (!is.null(shapeLab) & !is.null(shapeVal)) {
-    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
-  }
-  
-  ## additional variables
-  if (!is.null(add_vars)) {
-    add_vars1 <- purrr::imap(add_vars, \(value, label) {
-      purrr::map_chr(value, \(val) {
-        if (!is.na(val) & val != "") {
-          paste0('<i>', label, '</i>: ', val, '<br>')
-        } else {
-          ""
-        }
-      })
-    }) %>%
-      purrr::discard(is.null) %>%
-      purrr::reduce(paste0)
-    ht <- paste0(ht, add_vars1)
-  }
-  
-  ht <- paste0(ht, '<extra></extra>')
-  return(ht)
+  return(hovertemplates)
 }

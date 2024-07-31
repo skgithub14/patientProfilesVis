@@ -5,23 +5,31 @@
 \title{Create [plotly] tool tip hover template for a event plot}
 \usage{
 eventPlotHoverTemplate(
-  paramVal,
+  data,
+  paramVar,
   paramLab,
-  timeVal,
+  timeVar,
   timeLab,
   colorLab = NULL,
-  colorVal = NULL,
+  colorVar = NULL,
   shapeLab = NULL,
-  shapeVal = NULL,
+  shapeVar = NULL,
   add_vars = NULL
 )
 }
 \arguments{
+\item{data}{Data.frame with data.}
+
+\item{paramVar}{Character vector with variable(s) of \code{data} 
+with parameters. Variable content is displayed in the y-axis.}
+
 \item{paramLab}{Named character vector, 
 with label for the parameter variable(s) (\code{paramVar}).\cr
 This is used to set the default title.}
 
-\item{timeVal}{the value of `timeVar` for the tooltip}
+\item{timeVar}{String, variable of \code{data} with time,
+displayed in the x axis.\cr
+Records with missing time are not displayed in the plot.}
 
 \item{timeLab}{String, label for \code{timeVar}.
 This is used in the message
@@ -30,27 +38,19 @@ and for the default label of the x-axis.}
 
 \item{colorLab}{String, label for \code{colorVar}.}
 
-\item{colorVal}{optional, the value of `colorVar` for the tooltip}
+\item{colorVar}{String, variable of \code{data} with color.}
 
 \item{shapeLab}{String, label for \code{shapeVar}.
 Set by default to \code{colorLab} if \code{colorVar}
 but not \code{shapeVar} is not specified.}
 
-\item{shapeVal}{optional, the value of `shapeVar` for the tooltip}
+\item{shapeVar}{String, variable of \code{data} for shape of the points.
+By default, same as \code{colorVar}.}
 
 \item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_add_vars`}
-
-\item{title}{a string, the tool tip title}
-
-\item{paramValueVal}{the value of `paramValueVar` for the tooltip}
-
-\item{paramValueValUnits}{the value of `paramValueVarUnits` for the tooltip}
-
-\item{lln, uln}{optional numeric values, the lower and upper limit normal
-values, respectively}
 }
 \value{
-a string with html formatting
+a character vector of html formatted strings
 }
 \description{
 Create [plotly] tool tip hover template for a event plot
