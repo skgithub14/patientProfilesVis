@@ -98,7 +98,7 @@ plotlyEventPlot <- function(data,
       if (length(shapePalette) == 1) {
         shape_color_dat <- color_dat
       } else {
-        shape_color_dat <- data[which(color_dat[[shapeVar]] == shape_val),]
+        shape_color_dat <- color_dat[which(color_dat[[shapeVar]] == shape_val),]
       }
       
       # legend grouping
