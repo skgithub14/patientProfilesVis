@@ -9,9 +9,9 @@ test_that("plotlyLinePlot() generates a line plot", {
   dataSDTM <- dataSDTMCDISCP01
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   dataLB <- dataSDTM$LB
-  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  dataLB <- dataLB[which(dataLB$LBTEST %in% unique(dataLB$LBTEST)[1:5]),]
   subjectLB <- "01-704-1445"
-  dataLB <- dplyr::filter(dataLB, USUBJID == subjectLB)
+  dataLB <- dataLB[which(dataLB$USUBJID == subjectLB),]
   data <- dataLB
   colorVar <- "LBCAT"
   colorPalette <- getColorPalettePatientProfile(x = data[, colorVar])
@@ -242,9 +242,9 @@ test_that("plotlyLinePlot() can log the x-axis and include footnote", {
   data("dataSDTMCDISCP01", package = "clinUtils")
   dataSDTM <- dataSDTMCDISCP01
   dataLB <- dataSDTM$LB
-  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  dataLB <- dataLB[which(dataLB$LBTEST %in% unique(dataLB$LBTEST)[1:5]),]
   subjectLB <- "01-704-1445"
-  dataLB <- dplyr::filter(dataLB, USUBJID == subjectLB)
+  dataLB <- dataLB[which(dataLB$USUBJID == subjectLB),]
   data <- dataLB
   colorVar <- "LBCAT"
   colorPalette <- getColorPalettePatientProfile(x = data[, colorVar])
@@ -265,10 +265,7 @@ test_that("plotlyLinePlot() can log the x-axis and include footnote", {
   )
   
   # exaggerate negative values
-  data <- dplyr::mutate(
-    data,
-    LBDY = dplyr::if_else(LBDY < 0, LBDY - 100, LBDY)
-  )
+  data$LBDY[which(data$LBDY < 0)] <- data$LBDY[which(data$LBDY < 0)] - 100
   
   # log positive x values
   plotlyLinePlot(
@@ -329,9 +326,9 @@ test_that("subjectProfileLinePlot() can produce plotly outputs correctly", {
   data("dataSDTMCDISCP01", package = "clinUtils")
   dataSDTM <- dataSDTMCDISCP01
   dataLB <- dataSDTM$LB
-  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  dataLB <- dataLB[which(dataLB$LBTEST %in% unique(dataLB$LBTEST)[1:5]),]
   subjectLB <- "01-704-1445"
-  dataLB <- dplyr::filter(dataLB, USUBJID == subjectLB)
+  dataLB <- dataLB[which(dataLB$USUBJID == subjectLB),]
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
@@ -364,9 +361,9 @@ test_that("subjectProfileLinePlot() can produce plotly outputs for more than 1 s
   data("dataSDTMCDISCP01", package = "clinUtils")
   dataSDTM <- dataSDTMCDISCP01
   dataLB <- dataSDTM$LB
-  dataLB <- dplyr::filter(dataLB, LBTEST %in% unique(LBTEST)[1:5])
+  dataLB <- dataLB[which(dataLB$LBTEST %in% unique(dataLB$LBTEST)[1:5]),]
   subjectLB <- c("01-704-1445", "01-701-1192")
-  dataLB <- dplyr::filter(dataLB, USUBJID %in% subjectLB)
+  dataLB <- dataLB[which(dataLB$USUBJID %in% subjectLB),]
   data <- dataLB
   labelVarsSDTM <- attr(dataSDTM, "labelVars")
   
