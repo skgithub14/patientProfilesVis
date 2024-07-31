@@ -5,51 +5,60 @@
 \title{Create [plotly] tool tip hover template for a line plot}
 \usage{
 linePlotHoverTemplate(
-  title,
-  paramValueVal,
-  paramValueValUnits = NULL,
+  data,
+  paramFacetVar,
+  paramValueVar,
+  paramValueVarUnits = NULL,
   timeLab,
-  timeVal,
+  timeVar,
   colorLab = NULL,
-  colorVal = NULL,
+  colorVar = NULL,
   shapeLab = NULL,
-  shapeVal = NULL,
-  lln = NULL,
-  uln = NULL,
-  add_vars = NULL
+  shapeVar = NULL,
+  paramValueRangeVar = NULL,
+  add_vars = NULL,
+  labelVars
 )
 }
 \arguments{
-\item{title}{a string, the tool tip title}
+\item{data}{Data.frame with data.}
 
-\item{paramValueVal}{the value of `paramValueVar` for the tooltip}
-
-\item{paramValueValUnits}{the value of `paramValueVarUnits` for the tooltip}
+\item{paramValueVar}{String, variable of \code{data} with parameter value to
+represent.\cr Records with missing values are discarded.}
 
 \item{timeLab}{String, label for \code{timeVar}.
 This is used in the message
 indicating missing values for \code{timeVar},
 and for the default label of the x-axis.}
 
-\item{timeVal}{the value of `timeVar` for the tooltip}
+\item{timeVar}{String, variable of \code{data} with time,
+displayed in the x axis.\cr
+Records with missing time are not displayed in the plot.}
 
 \item{colorLab}{String, label for \code{colorVar}.}
 
-\item{colorVal}{optional, the value of `colorVar` for the tooltip}
+\item{colorVar}{String, variable of \code{data} with color.}
 
 \item{shapeLab}{String, label for \code{shapeVar}.
 Set by default to \code{colorLab} if \code{colorVar}
 but not \code{shapeVar} is not specified.}
 
-\item{shapeVal}{optional, the value of `shapeVar` for the tooltip}
+\item{shapeVar}{String, variable of \code{data} for shape of the points.
+By default, same as \code{colorVar}.}
 
-\item{lln, uln}{optional numeric values, the lower and upper limit normal
-values, respectively}
+\item{paramValueRangeVar}{Character vector of length 2 containing variables
+of \code{data} with minimum and maximum value for \code{paramValueVar},
+typically reference range indicators.\cr Range can differ per parameter and
+even per time point. This range is represented as a ribbon in the plot
+background. e.g. to represent the reference range of the variable.}
 
 \item{add_vars}{see [subjectProfileLinePlot()] argument `plotly_args`}
+
+\item{labelVars}{Named character vector with variable labels 
+(names are the variable code)}
 }
 \value{
-a string with html formatting
+a character vector of html formatted strings
 }
 \description{
 Create [plotly] tool tip hover template for a line plot

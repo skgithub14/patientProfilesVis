@@ -64,49 +64,20 @@ plotlyLinePlot <- function(data,
   }
   
   # create tool tip column in data
-  if (!is.null(paramValueVarUnits)) {
-    paramValueVarUnitsDat <- data[[paramValueVarUnits]]
-  } else {
-    paramValueVarUnitsDat <- NULL
-  }
-  if (!is.null(colorVar)) {
-    colorVarDat <- data[[colorVar]]
-  } else {
-    colorVarDat <- NULL
-  }
-  if (!is.null(shapeVar)) {
-    shapeVarDat <- data[[shapeVar]]
-  } else {
-    shapeVarDat <- NULL
-  }
-  if (!is.null(paramValueRangeVar)) {
-    llnDat <- data[[paramValueRangeVar[1]]]
-    ulnDat <- data[[paramValueRangeVar[2]]]
-  } else {
-    llnDat <- NULL
-    ulnDat <- NULL
-  }
-  if (!is.null(add_vars)) {
-    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
-                                                add_vars = add_vars, 
-                                                labelVars = labelVars)
-  }
-  data <- dplyr::mutate(
-    data,
-    hovertemplate = linePlotHoverTemplate(
-      title = paramFacetVar,
-      paramValueVal = !!rlang::sym(paramValueVar),
-      paramValueValUnits = paramValueVarUnitsDat,
-      timeLab = timeLab,
-      timeVal = !!rlang::sym(timeVar),
-      colorLab = colorLab,
-      colorVal = colorVarDat,
-      shapeLab = shapeLab,
-      shapeVal = shapeVarDat,
-      lln = llnDat,
-      uln = ulnDat,
-      add_vars = add_vars
-    )
+  data$hovertemplate <- linePlotHoverTemplate(
+    data = data,
+    paramFacetVar = paramFacetVar, 
+    paramValueVar = paramValueVar,
+    paramValueVarUnits = paramValueVarUnits,
+    timeLab = timeLab, 
+    timeVar = timeVar,
+    colorLab = colorLab, 
+    colorVar = colorVar, 
+    shapeLab = shapeLab, 
+    shapeVar = shapeVar,
+    paramValueRangeVar = paramValueRangeVar,
+    add_vars = add_vars,
+    labelVars = labelVars
   )
   
   # format ribbon colors
@@ -133,7 +104,7 @@ plotlyLinePlot <- function(data,
   
   # plot
   plot_tbl <- data %>%
-    dplyr::group_by(paramFacetVar) %>%
+    plotly::group_by(paramFacetVar) %>%
     plotly::do(
       p = {
         if (!is.null(log_x_axis)) {
@@ -343,92 +314,144 @@ plotlyLinePlot <- function(data,
 
 #' Create [plotly] tool tip hover template for a line plot
 #'
-#' @param title a string, the tool tip title
-#' @param paramValueVal the value of `paramValueVar` for the tooltip
-#' @param paramValueValUnits the value of `paramValueVarUnits` for the tooltip
-#' @param timeVal the value of `timeVar` for the tooltip
-#' @param colorVal optional, the value of `colorVar` for the tooltip
-#' @param shapeVal optional, the value of `shapeVar` for the tooltip
-#' @param lln,uln optional numeric values, the lower and upper limit normal
-#'   values, respectively
 #' @inheritParams patientProfilesVis-common-args
 #' @inheritParams subjectProfileLinePlot
 #' @inheritParams plotlyLinePlot
 #'
-#' @returns a string with html formatting
+#' @returns a character vector of html formatted strings
 #' 
-linePlotHoverTemplate <- function(title, 
-                                  paramValueVal,
-                                  paramValueValUnits = NULL,
+linePlotHoverTemplate <- function(data,
+                                  paramFacetVar, 
+                                  paramValueVar,
+                                  paramValueVarUnits = NULL,
                                   timeLab, 
-                                  timeVal,
+                                  timeVar,
                                   colorLab = NULL, 
-                                  colorVal = NULL, 
+                                  colorVar = NULL, 
                                   shapeLab = NULL, 
-                                  shapeVal = NULL,
-                                  lln = NULL,
-                                  uln = NULL,
-                                  add_vars = NULL) {
+                                  shapeVar = NULL,
+                                  paramValueRangeVar = NULL,
+                                  add_vars = NULL,
+                                  labelVars) {
+  
+  make_template <- function(paramFacetVal, 
+                            paramValueVal,
+                            paramValueValUnits,
+                            timeLab, 
+                            timeVal,
+                            colorLab, 
+                            colorVal, 
+                            shapeLab, 
+                            shapeVal,
+                            lln,
+                            uln,
+                            add_vars) {
     
-  # title (usually the parameter name) and y value
-  ht <- paste0(
-    '<b>', title, '</b><br><br>',
-    '<i>Value</i>: ', paramValueVal
-  )
-  
-  # optionally add units for y value
-  if (!is.null(paramValueValUnits)) {
-    units <- purrr::map_chr(paramValueValUnits, \(x) {
-      if (!is.na(x) & x != "") {
-        paste0(' ', x, '<br>')
-      } else {
-        '<br>'
-      }
-    })
-    ht <- paste0(ht, units)
-  } else {
-    ht <- paste0(ht, '<br>')
-  }
-  
-  # x value (time)
-  ht <- paste0(ht, '<i>', timeLab, '</i>: ', timeVal, '<br>')
-  
-  ## optional variables
-  # color
-  if (!is.null(colorLab) & !is.null(colorVal)) {
-    ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
-  }
-  
-  # shape
-  if (!is.null(shapeLab) & !is.null(shapeVal)) {
-    ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
-  }
-  
-  # ranges
-  if (!is.null(lln) & !is.null(uln)) {
+    # parameter value/y value
     ht <- paste0(
-      ht,
-      '<i>ULN</i>: ', uln, '<br>',
-      '<i>LLN</i>: ', lln, '<br>'
+      '<b>', paramFacetVal, '</b><br><br>',
+      '<i>Value</i>: ', paramValueVal
     )
-  }
-  
-  ## additional variables
-  if (!is.null(add_vars)) {
-    add_vars1 <- purrr::imap(add_vars, \(value, label) {
-      purrr::map_chr(value, \(val) {
-        if (!is.na(val) & val != "") {
-          paste0('<i>', label, '</i>: ', val, '<br>')
+    
+    # optionally add units for y value
+    if (!is.null(paramValueValUnits)) {
+      units <- purrr::map_chr(paramValueValUnits, \(x) {
+        if (!is.na(x) & x != "") {
+          paste0(' ', x, '<br>')
         } else {
-          ""
+          '<br>'
         }
       })
-    }) %>%
-      purrr::discard(is.null) %>%
-      purrr::reduce(paste0)
-    ht <- paste0(ht, add_vars1)
+      ht <- paste0(ht, units)
+    } else {
+      ht <- paste0(ht, '<br>')
+    }
+    
+    # x value (time)
+    ht <- paste0(ht, '<i>', timeLab, '</i>: ', timeVal, '<br>')
+    
+    ## optional variables
+    # color
+    if (!is.null(colorLab) & !is.null(colorVal)) {
+      ht <- paste0(ht, '<i>', colorLab, '</i>: ', colorVal, '<br>')
+    }
+    
+    # shape
+    if (!is.null(shapeLab) & !is.null(shapeVal)) {
+      ht <- paste0(ht, '<i>', shapeLab, '</i>: ', shapeVal, '<br>')
+    }
+    
+    # ranges
+    if (!is.null(lln) & !is.null(uln)) {
+      ht <- paste0(
+        ht,
+        '<i>ULN</i>: ', uln, '<br>',
+        '<i>LLN</i>: ', lln, '<br>'
+      )
+    }
+    
+    ## additional variables
+    if (!is.null(add_vars)) {
+      add_vars1 <- purrr::imap(add_vars, \(value, label) {
+        purrr::map_chr(value, \(val) {
+          if (!is.na(val) & val != "") {
+            paste0('<i>', label, '</i>: ', val, '<br>')
+          } else {
+            ""
+          }
+        })
+      }) %>%
+        purrr::discard(is.null) %>%
+        purrr::reduce(paste0)
+      ht <- paste0(ht, add_vars1)
+    }
+    
+    ht <- paste0(ht, '<extra></extra>')
+    return(ht)
   }
   
-  ht <- paste0(ht, '<extra></extra>')
-  return(ht)
+  if (!is.null(paramValueVarUnits)) {
+    paramValueVarUnitsDat <- data[[paramValueVarUnits]]
+  } else {
+    paramValueVarUnitsDat <- NULL
+  }
+  if (!is.null(colorVar)) {
+    colorVarDat <- data[[colorVar]]
+  } else {
+    colorVarDat <- NULL
+  }
+  if (!is.null(shapeVar)) {
+    shapeVarDat <- data[[shapeVar]]
+  } else {
+    shapeVarDat <- NULL
+  }
+  if (!is.null(paramValueRangeVar)) {
+    llnDat <- data[[paramValueRangeVar[1]]]
+    ulnDat <- data[[paramValueRangeVar[2]]]
+  } else {
+    llnDat <- NULL
+    ulnDat <- NULL
+  }
+  if (!is.null(add_vars)) {
+    add_vars <- formatAdditionalPlotlyHoverVars(data = data, 
+                                                add_vars = add_vars, 
+                                                labelVars = labelVars)
+  }
+  
+  hovertemplates <- make_template(
+    paramFacetVal = data$paramFacetVar,
+    paramValueVal = data[[paramValueVar]],
+    paramValueValUnits = paramValueVarUnitsDat,
+    timeLab = timeLab,
+    timeVal = data[[timeVar]],
+    colorLab = colorLab,
+    colorVal = colorVarDat,
+    shapeLab = shapeLab,
+    shapeVal = shapeVarDat,
+    lln = llnDat,
+    uln = ulnDat,
+    add_vars = add_vars
+  )
+  
+  return(hovertemplates)
 }
